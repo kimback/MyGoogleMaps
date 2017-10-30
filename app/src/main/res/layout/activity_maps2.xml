@@ -1,0 +1,46 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+
+<TextView
+    android:layout_height="wrap_content"
+    android:id="@+id/locStatus"
+    android:layout_width="match_parent"
+    android:textSize="25sp"
+    android:includeFontPadding="true"
+    android:singleLine="false"
+    android:textStyle="italic"
+    android:typeface="serif"
+    android:text="아직 수신되지 않았음">
+</TextView>
+
+<RelativeLayout
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+    <Button
+        android:id="@+id/add_geofences_button"
+        android:layout_width="100dp"
+        android:layout_height="50dp"
+        android:layout_weight="1"
+        android:text="add geofences!" />
+
+    <Button
+        android:id="@+id/remove_geofences_button"
+        android:layout_width="100dp"
+        android:layout_height="50dp"
+        android:layout_weight="1"
+        android:text="remove geofences!"
+        android:layout_toRightOf="@+id/add_geofences_button"/>
+</RelativeLayout>
+
+<fragment
+    xmlns:map="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/map2"
+    android:name="com.google.android.gms.maps.SupportMapFragment"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.bluesweater.mygooglemaps.MapsActivity2" />
+
+</LinearLayout>
