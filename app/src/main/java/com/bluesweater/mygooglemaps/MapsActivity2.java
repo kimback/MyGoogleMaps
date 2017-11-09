@@ -60,55 +60,62 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-
+/**
+ *
+ * 1. M(mashmallow) 버전 이후에 퍼미션 체크 관련 (ACCESS_FINE_LOCATION, ACCESS_COARSE_LOCATION)
+ * 2. GPS, NETWORK 체크 관련
+ * 3. 관련 권한들 체크후에 connect 필수
+ * 4. connect 후의  onConnect 에서의 mapStart
+ * 5. 후에 MapReady에서의 콜백 함수들 작업
+ *
+ *
+ *
+ *
+ *
+ *
+ */
 public class MapsActivity2 extends FragmentActivity implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
         LocationListener {
 
-    private static final double EARTH_RADIUS = 6378100.0; private int offset;
+    private Activity mActivity;
+    private static final String TAG = MainActivity.class.getSimpleName();
 
-    private GoogleApiClient mGoogleApiClient = null;
-    private GoogleMap mGoogleMap = null;
-    private Marker currentMarker = null;
+    //구글 맵 api관련
+    private GoogleApiClient mGoogleApiClient;
+    private GoogleMap mGoogleMap;
+    LocationRequest locationRequest;
 
+    //request code
     private static final int GPS_ENABLE_REQUEST_CODE = 2001;
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 2002;
+
+    //interval set
     private static final int UPDATE_INTERVAL_MS = 1000;  // 1초
     private static final int FASTEST_UPDATE_INTERVAL_MS = 500; // 0.5초
 
-
-    private static final String TAG = MainActivity.class.getSimpleName();
-
-    private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 34;
-
-    /**
-     * Tracks whether the user requested to add or remove geofences, or to do neither.
-     */
+    //geoTaskEnum
     private enum PendingGeofenceTask {
         ADD, REMOVE, NONE
+
     }
 
-
-    private Activity mActivity;
+    //퍼미션관련
     boolean askPermissionOnceAgain = false;
+    private boolean permissionChecked = false;
+
+    private static final double EARTH_RADIUS = 6378100.0;
+    private Marker currentMarker;
+    private int offset;
     boolean mRequestingLocationUpdates = false;
     Location mCurrentLocatiion;
     boolean mMoveMapByUser = true;
     boolean mMoveMapByAPI = true;
 
-    // Buttons for kicking off the process of adding or removing geofences.
+    // 지오펜싱관련
     private Button mAddGeofencesButton;
     private Button mRemoveGeofencesButton;
-
-    LocationRequest locationRequest = new LocationRequest()
-            .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
-            .setInterval(UPDATE_INTERVAL_MS)
-            .setFastestInterval(FASTEST_UPDATE_INTERVAL_MS);
-
-
-    private boolean permissionChecked = false;
-
     private GeoMainActivity geofencesExecute;
 
     @Override
@@ -119,6 +126,7 @@ public class MapsActivity2 extends FragmentActivity implements OnMapReadyCallbac
         Log.d(TAG, "onCreate");
 
         mActivity = this;
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON, WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         // Get the UI widgets.
         mAddGeofencesButton = (Button) findViewById(R.id.add_geofences_button);
@@ -136,9 +144,10 @@ public class MapsActivity2 extends FragmentActivity implements OnMapReadyCallbac
             }
         });
 
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
-                WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
+        locationRequest = new LocationRequest()
+                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
+                .setInterval(UPDATE_INTERVAL_MS)
+                .setFastestInterval(FASTEST_UPDATE_INTERVAL_MS);
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
@@ -146,15 +155,12 @@ public class MapsActivity2 extends FragmentActivity implements OnMapReadyCallbac
                 .addApi(LocationServices.API)
                 .build();
 
-
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map2);
+                .findFragmentById(R.id.mapFragment);
         mapFragment.getMapAsync(this);
 
 
     }
-
-
 
     @Override
     public void onBackPressed() {
@@ -162,17 +168,19 @@ public class MapsActivity2 extends FragmentActivity implements OnMapReadyCallbac
     }
 
 
-
-
     @Override
     public void onResume() {
 
         super.onResume();
 
+        //연결체크 후 위치정보 스타트
         if (mGoogleApiClient.isConnected()) {
 
             Log.d(TAG, "onResume : call startLocationUpdates");
-            if (!mRequestingLocationUpdates) startLocationUpdates();
+            //업데이트 되고 있지 않다면 시작해라
+            if (!mRequestingLocationUpdates) {
+                startLocationUpdates();
+            }
         }
 
         //앱 정보에서 퍼미션을 허가했는지를 다시 검사해봐야 한다.
@@ -187,12 +195,17 @@ public class MapsActivity2 extends FragmentActivity implements OnMapReadyCallbac
     }
 
 
+    //위치 정보 시작
     private void startLocationUpdates() {
 
+        //gps, network 활성화 상태 확인후
         if (!checkLocationServicesStatus()) {
+
+            // 퍼미션 체크후
 
             Log.d(TAG, "startLocationUpdates : call showDialogForLocationServiceSetting");
             showDialogForLocationServiceSetting();
+
         }else {
 
             //퍼미션체크
@@ -435,6 +448,7 @@ public class MapsActivity2 extends FragmentActivity implements OnMapReadyCallbac
     }
 
 
+    //체크 gps, network 활성화여부
     public boolean checkLocationServicesStatus() {
         LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 
@@ -519,7 +533,6 @@ public class MapsActivity2 extends FragmentActivity implements OnMapReadyCallbac
             showDialogForPermissionSetting("퍼미션 거부 + Don't ask again(다시 묻지 않음) " +
                     "체크 박스를 설정한 경우로 설정에서 퍼미션 허가해야합니다.");
         } else if (hasFineLocationPermission == PackageManager.PERMISSION_GRANTED) {
-
 
             Log.d(TAG, "checkPermissions : 퍼미션 가지고 있음");
             permissionChecked = true;
@@ -609,13 +622,12 @@ public class MapsActivity2 extends FragmentActivity implements OnMapReadyCallbac
     }
 
 
-    //여기부터는 GPS 활성화를 위한 메소드들
+    // GPS 활성화 셋팅
     private void showDialogForLocationServiceSetting() {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(MapsActivity2.this);
         builder.setTitle("위치 서비스 비활성화");
-        builder.setMessage("앱을 사용하기 위해서는 위치 서비스가 필요합니다.\n"
-                + "위치 설정을 수정하실래요?");
+        builder.setMessage("앱을 사용하기 위해서는 위치 서비스가 필요합니다");
         builder.setCancelable(true);
         builder.setPositiveButton("설정", new DialogInterface.OnClickListener() {
             @Override
@@ -645,18 +657,15 @@ public class MapsActivity2 extends FragmentActivity implements OnMapReadyCallbac
 
                 //사용자가 GPS 활성 시켰는지 검사
                 if (checkLocationServicesStatus()) {
-                    if (checkLocationServicesStatus()) {
 
-                        Log.d(TAG, "onActivityResult : 퍼미션 가지고 있음");
+                    //현재 연결되어 있지 않다면 연결하라
+                    Log.d(TAG, "onActivityResult : ===gps, network 활성화됨===");
+                    if (!mGoogleApiClient.isConnected()) {
 
-
-                        if ( mGoogleApiClient.isConnected() == false ) {
-
-                            Log.d( TAG, "onActivityResult : mGoogleApiClient connect ");
-                            mGoogleApiClient.connect();
-                        }
-                        return;
+                        Log.d( TAG, "onActivityResult :=== mGoogleApiClient connect ===");
+                        mGoogleApiClient.connect();
                     }
+                    return;
                 }
 
                 break;

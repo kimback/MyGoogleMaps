@@ -29,24 +29,16 @@
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
-
-		<meta-data
+        <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
 
         <activity
             android:name=".MapsActivity"
-            android:label="@string/title_activity_maps">
-
-        </activity>
-
+            android:label="@string/title_activity_maps"></activity>
         <activity
             android:name=".MapsActivity2"
-            android:label="@string/title_activity_maps">
-
-        </activity>
-
-
+            android:label="@string/title_activity_maps"></activity>
         <activity
             android:name=".MainActivity"
             android:label="@string/title_activity_main"
@@ -56,17 +48,14 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
         </activity>
         <activity
             android:name=".GeoMainActivity_Ex"
             android:label="@string/title_activity_main"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:theme="@style/AppTheme.NoActionBar"></activity>
 
-        </activity>
-        
         <service android:name=".GeofenceTransitionsIntentService" />
-        
+
     </application>
 
 </manifest>
