@@ -68,11 +68,6 @@ import java.util.Map;
  * 4. connect 후의  onConnect 에서의 mapStart
  * 5. 후에 MapReady에서의 콜백 함수들 작업
  *
- *
- *
- *
- *
- *
  */
 public class MapsActivity2 extends FragmentActivity implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
@@ -518,9 +513,11 @@ public class MapsActivity2 extends FragmentActivity implements OnMapReadyCallbac
     //여기부터는 런타임 퍼미션 처리을 위한 메소드들
     @TargetApi(Build.VERSION_CODES.M)
     private void checkPermissions() {
+
         boolean fineLocationRationale = ActivityCompat
                 .shouldShowRequestPermissionRationale(this,
                         Manifest.permission.ACCESS_FINE_LOCATION);
+
         int hasFineLocationPermission = ContextCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION);
 
@@ -954,7 +951,8 @@ public class MapsActivity2 extends FragmentActivity implements OnMapReadyCallbac
     }
 
     // 2. convert meters to pixels between 2 points in current zoom:
-    private int convertMetersToPixels(double lat, double lng, double radiusInMeters) { double lat1 = radiusInMeters / EARTH_RADIUS;
+    private int convertMetersToPixels(double lat, double lng, double radiusInMeters) {
+        double lat1 = radiusInMeters / EARTH_RADIUS;
         double lng1 = radiusInMeters / (EARTH_RADIUS * Math.cos((Math.PI * lat / 180)));
         double lat2 = lat + lat1 * 180 / Math.PI; double lng2 = lng + lng1 * 180 / Math.PI;
         Point p1 = mGoogleMap.getProjection().toScreenLocation(new LatLng(lat, lng));
@@ -1000,9 +998,12 @@ public class MapsActivity2 extends FragmentActivity implements OnMapReadyCallbac
     private LatLng getCoords(double lat, double lng) {
         LatLng latLng = new LatLng(lat, lng);
         Projection proj = mGoogleMap.getProjection();
-        Point p = proj.toScreenLocation(latLng); p.set(p.x, p.y + offset);
+        Point p = proj.toScreenLocation(latLng);
+        p.set(p.x, p.y + offset);
+
         return proj.fromScreenLocation(p);
     }
+
 
 
 

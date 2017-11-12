@@ -1,0 +1,48 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+<!--
+<RelativeLayout
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+    <Button
+        android:id="@+id/add_geofences_button"
+        android:layout_width="100dp"
+        android:layout_height="30dp"
+        android:layout_weight="1"
+        android:text="add geofences!" />
+
+    <Button
+        android:id="@+id/remove_geofences_button"
+        android:layout_width="100dp"
+        android:layout_height="30dp"
+        android:layout_weight="1"
+        android:text="remove geofences!"
+        android:layout_toRightOf="@+id/add_geofences_button"/>
+</RelativeLayout>-->
+<!--로딩뷰-->
+<RelativeLayout
+    android:id="@+id/loading_bar_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/loadingbar_backgroud"
+    android:clickable="true"
+    android:visibility="gone">
+    <ProgressBar
+        android:id="@+id/prog_bar1"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:layout_centerInParent="true"/>
+</RelativeLayout>
+
+
+<fragment
+android:name="com.google.android.gms.maps.SupportMapFragment"
+android:id="@+id/mapFragment"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+tools:context="com.bluesweater.mygooglemaps.AdminMapActivity" />
+
+</LinearLayout>

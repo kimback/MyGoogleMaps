@@ -8,29 +8,24 @@
     tools:context="com.bluesweater.mygooglemaps.MainActivity"
     tools:showIn="@layout/activity_main">
 
-        <Button
-            android:id="@+id/btn_geotest1"
+        <RelativeLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="지도테스트1"
+            android:layout_centerInParent="true">
+                <Button
+                    android:id="@+id/btn_geotest1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="일반사용자"/>
 
-            />
+                <Button
+                    android:id="@+id/btn_geotest2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="관리자"
+                    android:layout_toRightOf="@+id/btn_geotest1"
+                    android:layout_centerInParent="true"/>
+        </RelativeLayout>
 
-        <Button
-            android:id="@+id/btn_geotest2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="지도테스트2"
-            android:layout_toRightOf="@+id/btn_geotest1"
-            />
-
-
-        <Button
-            android:id="@+id/btn_geotest3"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="지오펜싱"
-            android:layout_toRightOf="@+id/btn_geotest2"
-            />
 
 </RelativeLayout>
