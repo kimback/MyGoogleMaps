@@ -11,6 +11,10 @@ public class MapsPreference {
 
     private Context ctx;
     private int versionInt;
+    private boolean saveLogin;
+    private String loginId;
+    private String selectedSkiResort;
+
 
     public MapsPreference(Context ctx) {
         this.ctx = ctx;
@@ -18,6 +22,9 @@ public class MapsPreference {
                 "SSA_pref", Context.MODE_PRIVATE);
 
         versionInt = pref.getInt("versionInt", 1000);
+        saveLogin = pref.getBoolean("saveLogin", true);
+        loginId = pref.getString("loginId", "");
+        selectedSkiResort = pref.getString("selectedSkiResort", "");
 
 
     }
@@ -31,11 +38,39 @@ public class MapsPreference {
         this.versionInt = versionInt;
     }
 
+    public boolean isSaveLogin() {
+        return saveLogin;
+    }
+
+    public void setSaveLogin(boolean saveLogin) {
+        this.saveLogin = saveLogin;
+    }
+
+    public String getLoginId() {
+        return loginId;
+    }
+
+    public void setLoginId(String loginId) {
+        this.loginId = loginId;
+    }
+
+    public String getSelectedSkiResort() {
+        return selectedSkiResort;
+    }
+
+    public void setSelectedSkiResort(String selectedSkiResort) {
+        this.selectedSkiResort = selectedSkiResort;
+    }
+
     public void appPrefSave() {
         SharedPreferences.Editor edit = ctx.getSharedPreferences(
                 "SSA_pref", Context.MODE_PRIVATE).edit();
 
         edit.putInt("versionInt", versionInt);
+        edit.putBoolean("saveLogin", saveLogin);
+        edit.putString("loginId", loginId);
+        edit.putString("selectedSkiResort", selectedSkiResort);
+
 
         edit.commit();
     }

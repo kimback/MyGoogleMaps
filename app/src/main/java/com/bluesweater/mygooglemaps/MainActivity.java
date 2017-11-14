@@ -24,6 +24,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setTitle("메인화면");
         setSupportActionBar(toolbar);
 
         btnGeo1 = (Button) findViewById(R.id.btn_geotest1);
