@@ -10,13 +10,11 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.bluesweater.mygooglemaps.core.ApplicationMaps;
-import com.bluesweater.mygooglemaps.core.MapsPreference;
 
 public class MainActivity extends AppCompatActivity {
 
     private Button btnGeo1;
     private Button btnGeo2;
-    private MapsPreference mapsPreference;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

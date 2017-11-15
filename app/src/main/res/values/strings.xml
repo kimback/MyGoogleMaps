@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">MyGoogleMaps</string>
+    <string name="app_name">눈밥</string>
     <string name="title_activity_maps">Map</string>
     <string name="title_activity_main">MainActivity</string>
     <string name="title_welcome_main">WelcomeActivity</string>
@@ -39,5 +39,12 @@
         functionality.</string>
     <string name="settings">Settings</string>
     <string name="title_activity_map_simple">MapActivitySimple</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string name="draw_open">열기</string>
+    <string name="draw_close">닫기</string>
+
 
 </resources>

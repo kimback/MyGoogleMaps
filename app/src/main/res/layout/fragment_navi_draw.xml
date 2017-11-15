@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/navi_menu_background">
+
+    <!--navi header-->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:orientation="vertical"
+        android:gravity="center_vertical">
+
+        <RelativeLayout
+            android:id="@+id/navi_menu_profile"
+            android:layout_width="match_parent"
+            android:layout_height="60dp">
+            <!--<ImageView
+                android:id="@+id/user_img"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="20dp"
+                android:background="@drawable/img_user"/>-->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="김보더(아이디)"
+                android:layout_marginLeft="5dp"
+                android:layout_centerVertical="true"
+                android:textSize="15dp"
+                android:textColor="#FFFFFF"/>
+        </RelativeLayout>
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:background="@color/background_white"/>
+
+    <!--navi content-->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!--내전투력 -->
+        <RelativeLayout
+            android:id="@+id/navi_menu_btn1"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:clickable="true"
+            android:background="@drawable/navi_menu_ripple1">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="내정보"
+                android:layout_marginLeft="10dp"
+                android:layout_centerVertical="true"
+                android:textSize="15dp"
+                android:textColor="#FFFFFF"/>
+        </RelativeLayout>
+
+        <!--전투력 측정 화면-->
+        <RelativeLayout
+            android:id="@+id/navi_menu_btn2"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:clickable="true"
+            android:background="@drawable/navi_menu_ripple1">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="전투력측정기"
+                android:layout_marginLeft="10dp"
+                android:layout_centerVertical="true"
+                android:textSize="15dp"
+                android:textColor="#FFFFFF"/>
+        </RelativeLayout>
+
+    </LinearLayout>
+
+    <!--sub content-->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@color/navi_sub_menu_background">
+
+        <!--기기설정-->
+        <RelativeLayout
+            android:id="@+id/navi_menu_btn9"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:clickable="true"
+            android:background="@drawable/navi_menu_ripple1">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="기기설정"
+                android:layout_marginLeft="10dp"
+                android:layout_centerVertical="true"
+                android:textSize="15dp"
+                android:textColor="#FFFFFF"/>
+        </RelativeLayout>
+
+        <!--로그아웃-->
+        <RelativeLayout
+            android:id="@+id/navi_menu_logout"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:clickable="true"
+            android:background="@drawable/navi_menu_ripple1">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="로그아웃"
+                android:layout_marginLeft="10dp"
+                android:layout_centerVertical="true"
+                android:textSize="15dp"
+                android:textColor="#FFFFFF"/>
+        </RelativeLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

@@ -64,7 +64,7 @@ public class SelectResortActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                startActivity(new Intent(SelectResortActivity.this, MainActivity.class));
+                startActivity(new Intent(SelectResortActivity.this, DashboardActivity.class));
                 finish();
 
             }

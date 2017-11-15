@@ -10,7 +10,6 @@ import com.bluesweater.mygooglemaps.core.ApplicationMaps;
 import com.bluesweater.mygooglemaps.core.MapsPreference;
 
 /**
- * 1. 로고 처리 후 next 페이지 이동
  *
  * class WelcomeActivity
  */
@@ -39,7 +38,8 @@ public class WelcomeActivity extends AppCompatActivity {
                     if(!mapsPreference.getLoginId().equals("")
                             && !mapsPreference.getSelectedSkiResort().equals("")){
 
-                        startActivity(new Intent(WelcomeActivity.this, AdminMapActivity.class));
+                        //메인으로
+                        startActivity(new Intent(WelcomeActivity.this, DashboardActivity.class));
                         finish();
                     }else{
                         //그외 로그인 해야함

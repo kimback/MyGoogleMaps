@@ -2,12 +2,15 @@ package com.bluesweater.mygooglemaps.core;
 
 import android.app.Application;
 
+import com.bluesweater.mygooglemaps.DashboardActivity;
+
 /**
  * Created by kimback on 2017. 11. 10..
  */
 
 public class ApplicationMaps extends Application{
     private static ApplicationMaps apps;
+    private DashboardActivity dashboardActivity;
 
     //============================================
     // 매니저 변수들
@@ -30,6 +33,9 @@ public class ApplicationMaps extends Application{
     //============================================
     private boolean fineLocationPermit = false;
     private boolean coarseLocationPermit = false;
+
+    public static final String mainUrl = "http://192.168.0.3:8080/webapp/hello";
+    public static final String restApiUrl = "http://192.168.0.3:8080/webapp/hello";
 
     @Override
     public void onCreate() {
@@ -54,7 +60,7 @@ public class ApplicationMaps extends Application{
     }
 
     public static MapsPreference getMapsPreference(){
-        if(mapsPreference != null){
+        if(mapsPreference == null){
             mapsPreference = new MapsPreference(apps);
         }
         return mapsPreference;
@@ -78,6 +84,14 @@ public class ApplicationMaps extends Application{
 
     public void setCoarseLocationPermit(boolean coarseLocationPermit) {
         this.coarseLocationPermit = coarseLocationPermit;
+    }
+
+    public DashboardActivity getDashboardActivity() {
+        return dashboardActivity;
+    }
+
+    public void setDashboardActivity(DashboardActivity dashboardActivity) {
+        this.dashboardActivity = dashboardActivity;
     }
 
     public void closeApplication(){
