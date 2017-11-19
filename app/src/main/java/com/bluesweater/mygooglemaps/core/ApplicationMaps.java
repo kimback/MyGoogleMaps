@@ -23,6 +23,7 @@ public class ApplicationMaps extends Application{
     //============================================
     public static final int REQUEST_PERMISSION_FINE_LOCATION = 1000;
     public static final int REQUEST_PERMISSION_COARSE_LOCATION = 2000;
+    public static final int REQUEST_PERMISSION_GPS_ENABLE_REQUEST_CODE = 3000;
 
     //============================================
     // result code
@@ -33,9 +34,14 @@ public class ApplicationMaps extends Application{
     //============================================
     private boolean fineLocationPermit = false;
     private boolean coarseLocationPermit = false;
+    private boolean gpsNetworkPermit = true;
 
-    public static final String mainUrl = "http://192.168.0.3:8080/webapp/hello";
-    public static final String restApiUrl = "http://192.168.0.3:8080/webapp/hello";
+    //메인 대쉬보드 URL
+    public static final String mainUrl = "http://192.168.0.3:8080/webapp/snowGoGoHello";
+    //사용자 정보 화면 URL
+    public static final String mydataUrl = "http://192.168.0.3:8080/webapp/snowGoGoUserData";
+    //서버와 통신 URL
+    public static final String restApiUrl = "http://192.168.0.3:8080/webapp/snowGoGoRESTApi";
 
     @Override
     public void onCreate() {
@@ -84,6 +90,14 @@ public class ApplicationMaps extends Application{
 
     public void setCoarseLocationPermit(boolean coarseLocationPermit) {
         this.coarseLocationPermit = coarseLocationPermit;
+    }
+
+    public boolean isGpsNetworkPermit() {
+        return gpsNetworkPermit;
+    }
+
+    public void setGpsNetworkPermit(boolean gpsNetworkPermit) {
+        this.gpsNetworkPermit = gpsNetworkPermit;
     }
 
     public DashboardActivity getDashboardActivity() {

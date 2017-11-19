@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimary">#2457BD</color>
     <color name="colorPrimaryDark">#303F9F</color>
-    <color name="colorAccent">#FF4081</color>
-    <color name="navi_menu_background">#015486</color>
-    <color name="navi_sub_menu_background">#1c6590</color>
+    <color name="colorAccent">#AFE0FF</color>
+    <color name="navi_menu_background">#008299</color>
+    <color name="navi_sub_menu_background">#008299</color>
     <color name="loadingbar_backgroud">#19000000</color>
     <color name="navi_ripple_effect">#014b78</color>
     <color name="navi_ripple_effect2">#1c6590</color>

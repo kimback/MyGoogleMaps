@@ -32,10 +32,26 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".LoginWorkActivity"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name=".SelectResortActivity"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:screenOrientation="portrait"/>
+
+        <activity android:name=".DashboardActivity"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:configChanges="orientation|screenSize">
+
+        </activity>
+        <activity
             android:name=".MainActivity"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".AdminMapActivity" />
+        <activity
+            android:name=".UserMapActivity" />
         <activity
             android:name=".MapsActivity"/>
         <activity
@@ -60,18 +76,6 @@
             android:value="@integer/google_play_services_version" />
 
         <service android:name=".GeofenceTransitionsIntentService" />
-
-        <activity
-            android:name=".LoginWorkActivity"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name=".SelectResortActivity"
-            android:theme="@style/AppTheme.NoActionBar" />
-
-        <activity android:name=".DashboardActivity"
-            android:theme="@style/AppTheme.NoActionBar">
-
-        </activity>
     </application>
 
 </manifest>

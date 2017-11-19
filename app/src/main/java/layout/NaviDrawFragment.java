@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.bluesweater.mygooglemaps.DashboardActivity;
 import com.bluesweater.mygooglemaps.R;
@@ -24,10 +25,12 @@ public class NaviDrawFragment extends Fragment {
 
     //navi btn define
     private RelativeLayout naviMenuProfile;
+    private RelativeLayout naviMenuBtn0;
     private RelativeLayout naviMenuBtn1;
     private RelativeLayout naviMenuBtn2;
     private RelativeLayout naviMenuBtn9;
     private RelativeLayout naviMenuLogout;
+    private TextView txtUserId;
 
     private MapsPreference pref = ApplicationMaps.getMapsPreference();
 
@@ -92,8 +95,19 @@ public class NaviDrawFragment extends Fragment {
     }
 
     private void initLayout(View v){
+        txtUserId = (TextView) v.findViewById(R.id.text_userId);
+        txtUserId.setText(pref.getLoginId() + " 님");
+
         naviMenuProfile = (RelativeLayout) v.findViewById(R.id.navi_menu_profile);
         naviMenuProfile.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                clickAction(v);
+            }
+        });
+
+        naviMenuBtn0 = (RelativeLayout) v.findViewById(R.id.navi_menu_btn0);
+        naviMenuBtn0.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
                 clickAction(v);
@@ -141,21 +155,26 @@ public class NaviDrawFragment extends Fragment {
                 //프로필 클릭시 처리
                 break;
 
-            //종합현황
+            //개인전투력
+            case R.id.navi_menu_btn0 :
+                //menuItem.setChecked(true);
+                mDrawerLayout.closeDrawers();
+                context.mainViewShow("RANK");
+                break;
+
+            //개인전투력
             case R.id.navi_menu_btn1 :
                 //menuItem.setChecked(true);
                 mDrawerLayout.closeDrawers();
-                context.mainViewShow();
+                context.mainViewShow("MYDATA");
                 break;
 
-            //안전알림
+            //전투력측정기
             case R.id.navi_menu_btn2 :
                 //menuItem.setChecked(true);
                 mDrawerLayout.closeDrawers();
                 context.displayContent(DashboardActivity.DISPLAY_CONTENT_GOGO_SNOWWORLD, "", "전투력측정기");
                 break;
-
-
 
             //기기설정
             case R.id.navi_menu_btn9 :

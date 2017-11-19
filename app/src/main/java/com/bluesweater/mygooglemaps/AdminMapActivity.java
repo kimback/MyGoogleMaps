@@ -84,8 +84,8 @@ public class AdminMapActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_admin_map);
 
-        mActivity = this;
         loadingLayout = (RelativeLayout) findViewById(R.id.loading_bar_layout);
+        mActivity = this;
 
         if(loadingLayout != null){
             loadingLayout.setVisibility(View.VISIBLE);
@@ -97,12 +97,12 @@ public class AdminMapActivity extends FragmentActivity {
         HashMap<String, Object> fenceMap2 = new HashMap<>();
 
         fenceMap.put("name","block1");
-        fenceMap.put("latitude","37.45316526593756");
-        fenceMap.put("longitude","126.63524184376");
+        fenceMap.put("latitude","37.438447610822294");
+        fenceMap.put("longitude","126.68807230889799");
 
         fenceMap2.put("name","block2");
-        fenceMap2.put("latitude","37.45286636857628");
-        fenceMap2.put("longitude","126.63501486182211");
+        fenceMap2.put("latitude","37.438437494782775");
+        fenceMap2.put("longitude","126.68697830289602");
 
         fencesList.add(fenceMap);
         fencesList.add(fenceMap2);
@@ -672,9 +672,6 @@ public class AdminMapActivity extends FragmentActivity {
 
 
     }
-
-
-
 
 
 }

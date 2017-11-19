@@ -24,9 +24,10 @@
                 android:layout_marginLeft="20dp"
                 android:background="@drawable/img_user"/>-->
             <TextView
+                android:id="@+id/text_userId"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="김보더(아이디)"
+                android:text=""
                 android:layout_marginLeft="5dp"
                 android:layout_centerVertical="true"
                 android:textSize="15dp"
@@ -47,6 +48,23 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
+        <!--전체 랭킹 -->
+        <RelativeLayout
+            android:id="@+id/navi_menu_btn0"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:clickable="true"
+            android:background="@drawable/navi_menu_ripple1">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="전체굇수현황"
+                android:layout_marginLeft="10dp"
+                android:layout_centerVertical="true"
+                android:textSize="15dp"
+                android:textColor="#FFFFFF"/>
+        </RelativeLayout>
+
         <!--내전투력 -->
         <RelativeLayout
             android:id="@+id/navi_menu_btn1"
@@ -57,7 +75,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="내정보"
+                android:text="나의전투력"
                 android:layout_marginLeft="10dp"
                 android:layout_centerVertical="true"
                 android:textSize="15dp"

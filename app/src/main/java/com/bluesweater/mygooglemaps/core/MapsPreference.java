@@ -13,7 +13,8 @@ public class MapsPreference {
     private int versionInt;
     private boolean saveLogin;
     private String loginId;
-    private String selectedSkiResort;
+    private String selectedSkiResortCode;
+    private String selectedSkiResortName;
 
 
     public MapsPreference(Context ctx) {
@@ -24,7 +25,8 @@ public class MapsPreference {
         versionInt = pref.getInt("versionInt", 1000);
         saveLogin = pref.getBoolean("saveLogin", true);
         loginId = pref.getString("loginId", "");
-        selectedSkiResort = pref.getString("selectedSkiResort", "");
+        selectedSkiResortCode = pref.getString("selectedSkiResortCode", "");
+        selectedSkiResortName = pref.getString("selectedSkiResortName", "");
 
 
     }
@@ -54,12 +56,21 @@ public class MapsPreference {
         this.loginId = loginId;
     }
 
-    public String getSelectedSkiResort() {
-        return selectedSkiResort;
+
+    public String getSelectedSkiResortCode() {
+        return selectedSkiResortCode;
     }
 
-    public void setSelectedSkiResort(String selectedSkiResort) {
-        this.selectedSkiResort = selectedSkiResort;
+    public void setSelectedSkiResortCode(String selectedSkiResortCode) {
+        this.selectedSkiResortCode = selectedSkiResortCode;
+    }
+
+    public String getSelectedSkiResortName() {
+        return selectedSkiResortName;
+    }
+
+    public void setSelectedSkiResortName(String selectedSkiResortName) {
+        this.selectedSkiResortName = selectedSkiResortName;
     }
 
     public void appPrefSave() {
@@ -69,7 +80,8 @@ public class MapsPreference {
         edit.putInt("versionInt", versionInt);
         edit.putBoolean("saveLogin", saveLogin);
         edit.putString("loginId", loginId);
-        edit.putString("selectedSkiResort", selectedSkiResort);
+        edit.putString("selectedSkiResortCode", selectedSkiResortCode);
+        edit.putString("selectedSkiResortName", selectedSkiResortName);
 
 
         edit.commit();
