@@ -177,4 +177,5 @@ public class GeofenceTransitionsIntentService extends IntentService {
                 return getString(R.string.unknown_geofence_transition);
         }
     }
+
 }
