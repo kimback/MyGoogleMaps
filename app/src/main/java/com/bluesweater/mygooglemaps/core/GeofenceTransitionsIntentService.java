@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.bluesweater.mygooglemaps;
+package com.bluesweater.mygooglemaps.core;
 
 import android.app.IntentService;
 import android.app.NotificationManager;
@@ -28,11 +28,23 @@ import android.support.v4.app.TaskStackBuilder;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.bluesweater.mygooglemaps.R;
+import com.bluesweater.mygooglemaps.WelcomeActivity;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingEvent;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 /**
  * Listener for geofence transition changes.
@@ -52,6 +64,7 @@ public class GeofenceTransitionsIntentService extends IntentService {
     public GeofenceTransitionsIntentService() {
         // Use the TAG to name the worker thread.
         super(TAG);
+        Log.i("TAG_SERVICE","========geofencingService create ========");
     }
 
     /**
@@ -61,6 +74,9 @@ public class GeofenceTransitionsIntentService extends IntentService {
      */
     @Override
     protected void onHandleIntent(Intent intent) {
+
+        Log.i("TAG_SERVICE","======== onHandleIntent ========");
+
         GeofencingEvent geofencingEvent = GeofencingEvent.fromIntent(intent);
         if (geofencingEvent.hasError()) {
             String errorMessage = GeofenceErrorMessages.getErrorString(this,
@@ -86,6 +102,12 @@ public class GeofenceTransitionsIntentService extends IntentService {
             // Send notification and log the transition details.
             sendNotification(geofenceTransitionDetails);
             Log.i(TAG, geofenceTransitionDetails);
+
+
+            requestBlockDataUpdate(triggeringGeofences);
+
+
+
         } else {
             // Log the error.
             Log.e(TAG, getString(R.string.geofence_transition_invalid_type, geofenceTransition));
@@ -121,13 +143,13 @@ public class GeofenceTransitionsIntentService extends IntentService {
      */
     private void sendNotification(String notificationDetails) {
         // Create an explicit content Intent that starts the main Activity.
-        Intent notificationIntent = new Intent(getApplicationContext(), MainActivity.class);
+        Intent notificationIntent = new Intent(getApplicationContext(), WelcomeActivity.class);
 
         // Construct a task stack.
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
 
         // Add the main Activity to the task stack as the parent.
-        stackBuilder.addParentStack(MainActivity.class);
+        stackBuilder.addParentStack(WelcomeActivity.class);
 
         // Push the content Intent onto the stack.
         stackBuilder.addNextIntent(notificationIntent);
@@ -140,14 +162,15 @@ public class GeofenceTransitionsIntentService extends IntentService {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
 
         // Define the notification settings.
-        builder.setSmallIcon(R.drawable.ic_launcher)
+        builder.setSmallIcon(R.drawable.img_selector)
                 // In a real app, you may want to use a library like Volley
                 // to decode the Bitmap.
                 .setLargeIcon(BitmapFactory.decodeResource(getResources(),
-                        R.drawable.ic_launcher))
+                        R.drawable.img_selector))
                 .setColor(Color.RED)
                 .setContentTitle(notificationDetails)
                 .setContentText(getString(R.string.geofence_transition_notification_text))
+                .setVibrate(new long[] { 1000, 1000, 1000 })
                 .setContentIntent(notificationPendingIntent);
 
         // Dismiss notification once the user touches it.
@@ -178,4 +201,134 @@ public class GeofenceTransitionsIntentService extends IntentService {
         }
     }
 
+
+    private void requestBlockDataUpdate(List<Geofence> geolist){
+
+        // Get the Ids of each geofence that was triggered.
+        ArrayList<String> triggeringGeofencesIdsList = new ArrayList<>();
+        for (Geofence geofence : geolist) {
+            triggeringGeofencesIdsList.add(geofence.getRequestId());
+        }
+
+        JSONArray jsonArray = new JSONArray(triggeringGeofencesIdsList);
+
+        Log.i("IntentServiceTag","jsonArray : " + jsonArray.toString());
+
+        String urlStr = "";
+
+        try {
+
+            urlStr = ApplicationMaps.restApiUrl + "/geoDataUpdateByTrigger?skiResort="
+                    + ApplicationMaps.getMapsPreference().getSelectedSkiResortCode()
+                    + "&blockCodes=" + jsonArray.toString()
+                    + "&userId=" + ApplicationMaps.getMapsPreference().getLoginId();
+            getHttpData(urlStr); //서버통신
+
+            //Log.i("LOGINTAG","doInBackground : " + authStr);
+        }catch (Exception e){
+            e.printStackTrace();
+
+        }
+    }
+
+    /**
+     * 해당 페이지를 가져온다.
+     * okHttp 를 사용하여 작성(새로운 쓰레드가 생성됨)
+     * 메인쓰레드와 따로 생각해서 작성해야함
+     *
+     * getHttpData
+     *
+     * @param page
+     * @return
+     * @throws Exception
+     */
+    public void getHttpData(String page) {
+
+        OkHttpClient client = new OkHttpClient();
+
+        //request
+        Request request = new Request.Builder()
+                .url(page)
+                .get()
+                .build();
+
+        try {
+            client.newCall(request).enqueue(new Callback() {
+
+                @Override
+                public void onFailure(Call call, IOException e){
+                    e.printStackTrace();
+
+                }
+
+                @Override
+                public void onResponse(Call call, final Response response) throws IOException {
+                    //받은 정보들로 후처리 구현
+                    //Log.i("IntentServiceTag",response.body().string());
+                    postGeoDataProcess(response.body().string());
+
+                }
+
+            });
+
+        } catch (Exception e) {
+            e.printStackTrace();
+
+
+        }finally {
+            //final logic
+        }
+
+    }
+
+
+
+    /**
+     * callbackJoinProcess 인증후 콜백 메서드
+     * @param resultStr
+     */
+    private void postGeoDataProcess(String resultStr){
+
+        Log.i("IntentServiceTag","resultStr" + resultStr);
+
+        String dataSuccess = "F";
+        try {
+            if(resultStr != null && !resultStr.equals("")){
+
+                JSONArray jsonArray = new JSONArray(resultStr);
+                //정보[0]
+                for (int i = 0; i < jsonArray.length(); i++) {
+
+                    JSONObject jo = jsonArray.getJSONObject(i);
+
+                    if(jo.getString("result").equals("1")){
+                        dataSuccess = "T";
+                        Log.i("IntentServiceTag", "===눈밥 트리거 포인트 업데이트 완료===");
+                    }
+
+                }
+
+            }
+
+            if(dataSuccess.equals("T")){
+                //t
+            }
+
+        }catch(Exception e){
+            e.printStackTrace();
+
+        }
+
+    }
+
+
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        Log.i("TAG_SERVICE","======== onDestroy ========");
+
+
+    }
 }

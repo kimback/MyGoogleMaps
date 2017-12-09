@@ -155,14 +155,14 @@ public class NaviDrawFragment extends Fragment {
                 //프로필 클릭시 처리
                 break;
 
-            //개인전투력
+            //전체전투력 (웹뷰)
             case R.id.navi_menu_btn0 :
                 //menuItem.setChecked(true);
                 mDrawerLayout.closeDrawers();
                 context.mainViewShow("RANK");
                 break;
 
-            //개인전투력
+            //개인전투력(웹뷰)
             case R.id.navi_menu_btn1 :
                 //menuItem.setChecked(true);
                 mDrawerLayout.closeDrawers();

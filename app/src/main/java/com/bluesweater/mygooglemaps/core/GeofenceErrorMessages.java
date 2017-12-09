@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 
-package com.bluesweater.mygooglemaps;
+package com.bluesweater.mygooglemaps.core;
 
 import android.content.Context;
 import android.content.res.Resources;
 
+import com.bluesweater.mygooglemaps.R;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.location.GeofenceStatusCodes;
 
 /**
  * Geofence error codes mapped to error messages.
  */
-class GeofenceErrorMessages {
+public class GeofenceErrorMessages {
     /**
      * Prevents instantiation.
      */

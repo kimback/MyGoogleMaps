@@ -109,6 +109,7 @@ public class ApplicationMaps extends Application{
     }
 
     public void closeApplication(){
+
         //app close logic
         if(permissionsMachine != null){
             permissionsMachine = null;

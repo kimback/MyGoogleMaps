@@ -1,16 +1,19 @@
 package com.bluesweater.mygooglemaps;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -57,10 +60,6 @@ public class LoginWorkActivity extends AppCompatActivity {
 
         mapsPreference = ApplicationMaps.getMapsPreference();
         workerHandler = new Handler();
-
-        if(progressLayout!=null) {
-            progressLayout.setVisibility(View.GONE);
-        }
 
         //체크 토글
         if(mapsPreference.isSaveLogin()){
@@ -109,9 +108,8 @@ public class LoginWorkActivity extends AppCompatActivity {
 
             }
         });
-        if(progressLayout!=null) {
-            progressLayout.setVisibility(View.GONE);
-        }
+
+        showHideLoadingBar("hide");
 
     }
 
@@ -218,6 +216,15 @@ public class LoginWorkActivity extends AppCompatActivity {
 
     }
 
+
+    private void hideSoftKeyboard() {
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (getCurrentFocus() != null) {
+            imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+        }
+    }
+
+
     //========= 로그인 인증처리 관련 http connect =========================================================
 
     /**
@@ -232,12 +239,29 @@ public class LoginWorkActivity extends AppCompatActivity {
      */
     private void requestMyLogin(String loginId, String loginPw){
 
-        if(progressLayout != null) {
-            progressLayout.setVisibility(View.VISIBLE);
-        }
+        showHideLoadingBar("show");
 
         //실제 로직
-        preLoginProcess(loginId, loginPw);
+        preLoginProcess(loginId, loginPw, "login");
+    }
+
+
+    /**
+     * 가입 처리 프로세스
+     * restAPI를 통해 서버에서 로그인 정보를 인증받기 위한 요청.
+     *
+     * requestJoinUser
+     *
+     *
+     * @param loginId
+     * @param loginPw
+     */
+    private void requestJoinUser(String loginId, String loginPw, String type){
+
+       showHideLoadingBar("show");
+
+        //실제 로직
+        preLoginProcess(loginId, loginPw, type);
     }
 
 
@@ -255,14 +279,22 @@ public class LoginWorkActivity extends AppCompatActivity {
         try {
             String uid = params[0];
             String upw = params[1];
-
-            urlStr = ApplicationMaps.restApiUrl + "/myLogin?uid="+ uid + "&upw=" + upw;
-            getHttpData(urlStr); //서버통신
+            String type = params[2];
+            if(type.equals("login")) {
+                urlStr = ApplicationMaps.restApiUrl + "/myLogin?uid=" + uid + "&upw=" + upw;
+            }else if(type.equals("userJoinService")) {
+                urlStr = ApplicationMaps.restApiUrl + "/userJoinService?uid=" + uid + "&upw=" + upw;
+            }
+            getHttpData(urlStr, type); //서버통신
 
 
             //Log.i("LOGINTAG","doInBackground : " + authStr);
         }catch (Exception e){
+
             e.printStackTrace();
+
+            showHideLoadingBar("hide");
+
             Snackbar snackbar = Snackbar.make(alertCanvas, "로그인중 장애 발생", Snackbar.LENGTH_LONG);
             snackbar.show();
         }
@@ -303,14 +335,8 @@ public class LoginWorkActivity extends AppCompatActivity {
                 Snackbar snackbar = Snackbar.make(alertCanvas, "로그인에 실패하였습니다.", Snackbar.LENGTH_LONG);
                 snackbar.show();
 
-                workerHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (progressLayout != null) {
-                            progressLayout.setVisibility(View.GONE);
-                        }
-                    }
-                });
+                showHideLoadingBar("hide");
+
                 return;
             }
         }else if(resultJsonStr != null && resultJsonStr.equals("err500")) { //에러가 발생했다면
@@ -318,30 +344,73 @@ public class LoginWorkActivity extends AppCompatActivity {
             Snackbar snackbar = Snackbar.make(alertCanvas, "서버와 통신중 문제가 발생하였습니다.", Snackbar.LENGTH_LONG);
             snackbar.show();
 
-            workerHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (progressLayout != null) {
-                        progressLayout.setVisibility(View.GONE);
-                    }
-                }
-            });
+            showHideLoadingBar("hide");
+
             return;
         }else{
             Snackbar snackbar = Snackbar.make(alertCanvas, "서버와 통신중 문제가 발생하였습니다.", Snackbar.LENGTH_LONG);
             snackbar.show();
-            workerHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (progressLayout != null) {
-                        progressLayout.setVisibility(View.GONE);
-                    }
-                }
-            });
+
+            showHideLoadingBar("hide");
 
         }
 
     }
+
+
+    /**
+     * 가입처리 (response 후 로직)
+     * postLoginProcess
+     * @param jsonStr
+     */
+    private void postJoinProcess(String jsonStr) {
+
+        //기본적인 값 필터링
+        String resultJsonStr = "";
+        resultJsonStr = jsonStr.replaceAll("\n","");
+        resultJsonStr = resultJsonStr.replaceAll("\r","");
+        resultJsonStr = resultJsonStr.trim();
+        if(resultJsonStr.equals("[]")){
+            resultJsonStr = "";
+        }
+
+        //에러가 아니라면 처리
+        if(resultJsonStr != null && !resultJsonStr.equals("err500")){
+            if(resultJsonStr != "") {
+                final String resultParam = resultJsonStr;
+
+                workerHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        callbackJoinProcess(resultParam);
+                    }
+                });
+
+
+            }else{
+                Snackbar snackbar = Snackbar.make(alertCanvas, "로그인에 실패하였습니다.", Snackbar.LENGTH_LONG);
+                snackbar.show();
+
+                showHideLoadingBar("hide");
+                return;
+            }
+        }else if(resultJsonStr != null && resultJsonStr.equals("err500")) { //에러가 발생했다면
+
+            Snackbar snackbar = Snackbar.make(alertCanvas, "서버와 통신중 문제가 발생하였습니다.", Snackbar.LENGTH_LONG);
+            snackbar.show();
+
+            showHideLoadingBar("hide");
+            return;
+        }else{
+            Snackbar snackbar = Snackbar.make(alertCanvas, "서버와 통신중 문제가 발생하였습니다.", Snackbar.LENGTH_LONG);
+            snackbar.show();
+            showHideLoadingBar("hide");
+            return;
+
+        }
+
+    }
+
 
 
     /**
@@ -350,8 +419,8 @@ public class LoginWorkActivity extends AppCompatActivity {
      */
     private void callbackLoginProcess(String resultStr){
         String loginSuccess = "F";
-        String uId = loginId.getText().toString();
-        String uPw = loginPw.getText().toString();
+        final String uId = loginId.getText().toString();
+        final String uPw = loginPw.getText().toString();
 
         if(alertCanvas != null) {
             alertCanvas.setVisibility(View.GONE);
@@ -376,19 +445,73 @@ public class LoginWorkActivity extends AppCompatActivity {
                         mapsPreference.setLoginId("");
                         mapsPreference.appPrefSave();
 
-                        Snackbar snackbar = Snackbar.make(alertCanvas,
-                                "로그인 인증이 실패하였습니다.", Snackbar.LENGTH_LONG);
-                        snackbar.show();
-                        return;
+                        //Snackbar snackbar = Snackbar.make(alertCanvas,
+                                //"패스워드가 틀렸거나, 등록되있지 않습니다. 등록 하시겠습니까?", Snackbar.LENGTH_LONG);
+                        //snackbar.show();
+
+                        new AlertDialog.Builder(this)
+                                .setTitle("패스워드가 틀렸거나, " +
+                                        "등록되있지 않습니다. 등록 하시겠습니까?")
+                                .setPositiveButton("확인",
+                                        new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog,
+                                                                int which) {
+
+
+                                                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                                                    @Override
+                                                    public void run() {
+                                                        if(alertCanvas != null) {
+                                                            alertCanvas.setVisibility(View.VISIBLE);
+                                                        }
+                                                        hideSoftKeyboard();
+
+                                                    }
+                                                });
+                                                requestJoinUser(uId, uPw, "userJoinService");
+
+                                                return;
+                                            }
+                                        })
+
+                                    .setNegativeButton("취소",
+                                            new DialogInterface.OnClickListener() {
+                                                @Override
+                                                public void onClick(DialogInterface dialog,
+                                                                    int which) {
+                                                    new Handler(Looper.getMainLooper()).post(new Runnable() {
+                                                        @Override
+                                                        public void run() {
+                                                            if(alertCanvas != null) {
+                                                                alertCanvas.setVisibility(View.VISIBLE);
+                                                            }
+                                                            hideSoftKeyboard();
+                                                            return;
+                                                        }
+                                                    });
+                                                }
+                                            })
+
+                                    .show();
+
                     }
 
 
-                    }
+                }
 
             }
 
         }catch(Exception e){
+
             e.printStackTrace();
+
+            Snackbar snackbar = Snackbar.make(alertCanvas, "로그인처리중 문제가 발생하였습니다.", Snackbar.LENGTH_LONG);
+            snackbar.show();
+
+            showHideLoadingBar("hide");
+
+
         }
 
         if(loginSuccess.equals("T")){
@@ -403,6 +526,66 @@ public class LoginWorkActivity extends AppCompatActivity {
 
 
 
+    /**
+     * callbackJoinProcess 인증후 콜백 메서드
+     * @param resultStr
+     */
+    private void callbackJoinProcess(String resultStr){
+
+        String loginSuccess = "F";
+
+        final String uId = loginId.getText().toString();
+        final String uPw = loginPw.getText().toString();
+
+
+        if(progressLayout != null) {
+            progressLayout.setVisibility(View.GONE);
+        }
+
+        try {
+            if(resultStr != null && !resultStr.equals("")){
+
+                JSONArray jsonArray = new JSONArray(resultStr);
+                //로그인 인증정보[0]
+                for (int i = 0; i < jsonArray.length(); i++) {
+
+                    JSONObject jo = jsonArray.getJSONObject(i);
+                    if(jo.get("result").toString().equals("1")){
+
+                        //로그인 성공! 아이디저장!
+                        mapsPreference.setLoginId(uId);
+                        mapsPreference.appPrefSave();
+                        loginSuccess = "T";
+
+                    }else{
+                        Snackbar snackbar = Snackbar.make(alertCanvas, "가입처리에 문제가 발생하였습니다.", Snackbar.LENGTH_LONG);
+                        snackbar.show();
+                    }
+                }
+
+            }
+
+            if(loginSuccess.equals("T")){
+                //Log.i("===LOGINTAG=== : ", "로그인 인증처리 완료");
+                startActivity(new Intent(LoginWorkActivity.this, SelectResortActivity.class));
+                finish();
+            }else{
+                //Log.i("===LOGINTAG=== : ", "로그인 인증처리 실패");
+            }
+
+        }catch(Exception e){
+            e.printStackTrace();
+
+
+            Snackbar snackbar = Snackbar.make(alertCanvas, "로그인처리중 문제가 발생하였습니다.", Snackbar.LENGTH_LONG);
+            snackbar.show();
+
+            showHideLoadingBar("hide");
+
+        }
+
+    }
+
 
     /**
      * 해당 페이지를 가져온다.
@@ -415,7 +598,7 @@ public class LoginWorkActivity extends AppCompatActivity {
      * @return
      * @throws Exception
      */
-    public void getHttpData(String page) throws Exception {
+    public void getHttpData(String page, final String type) {
 
         OkHttpClient client = new OkHttpClient();
 
@@ -428,15 +611,27 @@ public class LoginWorkActivity extends AppCompatActivity {
         try {
             client.newCall(request).enqueue(new Callback() {
 
+                final String callType = type;
+
                 @Override
                 public void onFailure(Call call, IOException e){
                     e.printStackTrace();
+
+                    Snackbar snackbar = Snackbar.make(alertCanvas, "로그인중 장애 발생", Snackbar.LENGTH_LONG);
+                    snackbar.show();
+
+                    showHideLoadingBar("hide");
                 }
 
                 @Override
                 public void onResponse(Call call, final Response response) throws IOException {
                     //받은 정보들로 후처리 구현
-                    postLoginProcess(response.body().string());
+                    if(callType.equals("login")){
+                        postLoginProcess(response.body().string());
+                    }else if(callType.equals("userJoinService")){
+                        postJoinProcess(response.body().string());
+                    }
+
 
                 }
 
@@ -444,10 +639,13 @@ public class LoginWorkActivity extends AppCompatActivity {
 
         } catch (Exception e) {
             e.printStackTrace();
-            throw new Exception(e.getMessage());
+
+            Snackbar snackbar = Snackbar.make(alertCanvas, "로그인중 장애 발생", Snackbar.LENGTH_LONG);
+            snackbar.show();
 
         }finally {
             //final logic
+            showHideLoadingBar("hide");
         }
 
     }
@@ -456,6 +654,24 @@ public class LoginWorkActivity extends AppCompatActivity {
     //======================================================================================
 
 
+    private void showHideLoadingBar(final String type){
+        workerHandler.post(new Runnable() {
+            @Override
+            public void run() {
+
+                if(progressLayout != null) {
+                    if(type.equals("show")) {
+                        progressLayout.setVisibility(View.VISIBLE);
+                    }else{
+                        progressLayout.setVisibility(View.GONE);
+                    }
+                }
+
+            }
+        });
+
+
+    }
 
 
 

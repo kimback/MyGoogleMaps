@@ -41,6 +41,7 @@ public class DashboardActivity extends AppCompatActivity {
     public static final int DISPLAY_CONTENT_GOGO_SNOWWORLD = 1;
     public static final int DISPLAY_CONTENT_APP_SETTING = 2;
     public static final int DISPLAY_CONTENT_APP_LOGOUT = 3;
+    public static final int DISPLAY_CONTENT_GOGO_SNOW_PARK_CHANGE = 4;
 
 
     @Override
@@ -100,8 +101,8 @@ public class DashboardActivity extends AppCompatActivity {
 
         //앱 나갈때
         else {
-            new AlertDialog.Builder(this, R.style.Theme_AppCompat_Dialog)
-                    .setTitle("종료하시겠습니까?")
+            new AlertDialog.Builder(this)
+                    .setTitle("앱을 종료하시겠습니까?")
                     .setPositiveButton("확인",
                             new DialogInterface.OnClickListener() {
                                 @Override
@@ -157,15 +158,18 @@ public class DashboardActivity extends AppCompatActivity {
                 return true;
             }
 
-            return false;
-
-        }else if(currDisplay == DashboardActivity.DISPLAY_CONTENT_GOGO_SNOWWORLD){
-            mainViewShow("MAIN");
-            return true;
-
-        }else{
-            return false;
         }
+
+        return false;
+
+
+        //else if(currDisplay == DashboardActivity.DISPLAY_CONTENT_GOGO_SNOWWORLD){
+            //mainViewShow("MAIN");
+            //return true;
+
+        //}else{
+            //return false;
+        //}
     }
 
 
@@ -219,7 +223,7 @@ public class DashboardActivity extends AppCompatActivity {
         //M 이상에서 권한 관련 적용됨
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (!ApplicationMaps.getPermissionsMachine().locationPermissionCheck()) {
-                Toast.makeText(this, "LOCATION 권한을 체크하세요.", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(this, "LOCATION 권한을 체크하세요.", Toast.LENGTH_SHORT).show();
                 ApplicationMaps.getPermissionsMachine().requestLocationPermissions(this);
             } else {
                 ApplicationMaps.getApps().setFineLocationPermit(true);
@@ -263,6 +267,9 @@ public class DashboardActivity extends AppCompatActivity {
         if(type.equals("MYDATA")){
             url = ApplicationMaps.mydataUrl;
         }else{
+            //main
+            //rank
+
             url = ApplicationMaps.mainUrl;
         }
         //+ "&selectedSkiResort=" + pref.getSelectedSkiResort() + "&userId=" + userId;
@@ -327,23 +334,14 @@ public class DashboardActivity extends AppCompatActivity {
 
                 currDisplay = display;
 
-                //contentFragment = new SnowGoGoFragment();
-
-                //웹url
-                //Bundle bundle2 = new Bundle();
-                //bundle2.putString("title", title);
-                //bundle2.putString("url", url);
-                //contentFragment.setArguments(bundle2);
-
-                //chageFragmentView(contentFragment);
-
                 //권한별 화면이 다르다
                 Intent i = null;
-                if(pref.getLoginId().equals("kimback1")){
+                //if(pref.getLoginId().equals("kimback1")){
                     i = new Intent(this, AdminMapActivity.class);
-                }else{
-                    i = new Intent(this, UserMapActivity.class);
-                }
+                //}
+                //else{
+                    //i = new Intent(this, UserMapActivity.class);
+                //}
 
                 startActivity(i);
 
@@ -352,6 +350,21 @@ public class DashboardActivity extends AppCompatActivity {
             case DISPLAY_CONTENT_APP_SETTING :
                 //앱 설정
                 currDisplay = display;
+
+                new AlertDialog.Builder(this)
+                        .setTitle("준비중입니다.")
+                        .setPositiveButton("확인",
+                                new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog,
+                                                        int which) {
+
+                                        return;
+                                    }
+                                }).show();
+
+
+
                 //Intent appSettingIntent = new Intent(this, SettingActivity.class);
                 //startActivityForResult(appSettingIntent, 0);
                 break;

@@ -19,6 +19,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.bluesweater.mygooglemaps.core.GeofenceErrorMessages;
+import com.bluesweater.mygooglemaps.core.GeofenceTransitionsIntentService;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingClient;
 import com.google.android.gms.location.GeofencingRequest;
@@ -197,7 +199,7 @@ public class GeoMainActivity_Ex extends AppCompatActivity implements OnCompleteL
                     R.string.geofences_removed;
             Toast.makeText(this, getString(messageId), Toast.LENGTH_SHORT).show();
         } else {
-            // Get the status code for the error and log it using a user-friendly message.
+            // Get the status code for the error an log it using a user-friendly message.
             String errorMessage = GeofenceErrorMessages.getErrorString(this, task.getException());
             Log.w(TAG, errorMessage);
         }

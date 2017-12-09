@@ -33,6 +33,8 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.bluesweater.mygooglemaps.core.GeofenceErrorMessages;
+import com.bluesweater.mygooglemaps.core.GeofenceTransitionsIntentService;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.Geofence;

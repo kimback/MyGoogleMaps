@@ -127,6 +127,8 @@ public class PermissionsMachine {
                     return;
                 }
             });
+
+            builder.show();
         }
 
 

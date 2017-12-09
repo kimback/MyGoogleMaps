@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">눈밥</string>
+    <string name="app_name">눈밥스</string>
     <string name="title_activity_maps">Map</string>
     <string name="title_activity_main">MainActivity</string>
     <string name="title_welcome_main">WelcomeActivity</string>
@@ -30,7 +30,7 @@
     <string name="unknown_geofence_transition">Unknown Transition</string>
 
     <string name="geofence_transition_notification_text">
-        Click notification to return to app
+        이벤트 발생!
     </string>
 
     <string name="insufficient_permissions">Insufficient permissions.</string>

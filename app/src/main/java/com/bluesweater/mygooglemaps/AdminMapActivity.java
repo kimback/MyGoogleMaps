@@ -1,28 +1,30 @@
 package com.bluesweater.mygooglemaps;
 
 import android.app.Activity;
-import android.app.PendingIntent;
-import android.content.Intent;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.bluesweater.mygooglemaps.core.ApplicationMaps;
+import com.bluesweater.mygooglemaps.core.GeofencingExecutor;
 import com.bluesweater.mygooglemaps.core.MapsPreference;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.Geofence;
-import com.google.android.gms.location.GeofencingClient;
-import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
@@ -37,8 +39,9 @@ import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -47,6 +50,22 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+
+/**
+ * 위치정보 표시와 geofencing 기술을 같이 사용
+ * 화면이 백그라운드 상태일때는 위치 데이터 수신을 정지한다.
+ * 지오펜스 정보는 계속 수신중 (서비스에서)
+ * 화면에 다시 들어오면 현재 위치를 수신하여 카메라가 이동한다.
+ *
+ *
+ *
+ * AdminMapActivity
+ */
 public class AdminMapActivity extends FragmentActivity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -59,25 +78,25 @@ public class AdminMapActivity extends FragmentActivity {
     private GoogleMap mGoogleMap;
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest locationRequest;
-    public GeoMainActivity geofencesExecute;
+    public GeofencingExecutor geofencesExecute;
 
-    //interval set
+    //위치정보 interval set
     private static final int UPDATE_INTERVAL_MS = 1000;  // 1초
     private static final int FASTEST_UPDATE_INTERVAL_MS = 500; // 0.5초
 
     //flag
     private boolean mRequestingLocationUpdates = false;
+    //resume, pause 에서 중지하고 시작하니 firstMapStarted 를 통해 mapReady후에 타도록 한다
+    private boolean firstMapStarted = false;
 
     //ui
     private RelativeLayout loadingLayout;
+    private LinearLayout adminMapLayout;
 
-    //geoTaskEnum
-    private enum PendingGeofenceTask {
-        ADD, ADDED, REMOVE, REMOVED, NONE
-    }
+    private Handler workerHandler;
 
-    //fence info list
-    public List<Map<String, Object>> fencesList;
+    //fenceList
+    List<Map<String, Object>> fenceList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,30 +104,136 @@ public class AdminMapActivity extends FragmentActivity {
         setContentView(R.layout.activity_admin_map);
 
         loadingLayout = (RelativeLayout) findViewById(R.id.loading_bar_layout);
-        mActivity = this;
+        adminMapLayout = (LinearLayout) findViewById(R.id.admin_map_layout);
 
-        if(loadingLayout != null){
-            loadingLayout.setVisibility(View.VISIBLE);
+        mActivity = this;
+        mapsPreference = ApplicationMaps.getMapsPreference();
+        workerHandler = new Handler();
+        fenceList = new ArrayList<>();
+
+        showHideLoadingBar("show");
+
+        //데이터 준비 후 - > 콜백에서 위치정보 초기화 시작
+        requestFenceBlockData();
+
+        //initGeoService();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        Log.i("TAGAdminMapActivity","=======onResume==========");
+
+        if(firstMapStarted){
+            // 연결되어있지 않다면
+            if(mGoogleApiClient != null && !mGoogleApiClient.isConnected()){
+
+                //연결해라.
+                mGoogleApiClient.connect();
+                Log.i("TAGAdminMapActivity","=======connect==========");
+            }
+
+            //연결되어 있다면
+            if(mGoogleApiClient != null && mGoogleApiClient.isConnected()){
+
+                //위치정보가 업데이트 되고 있지 않다면 시작해라
+                if (!mRequestingLocationUpdates) {
+                    Log.i("TAGAdminMapActivity","=======mRequestingLocationUpdates==========");
+                    try {
+                        //위치 정보 스타트
+                        startLocationMachine();
+                    }catch(Exception e){
+                        e.printStackTrace();
+                    }
+                }
+
+
+            }
         }
 
-        //펜스리스트 셋팅
-        fencesList = new ArrayList<>();
-        HashMap<String, Object> fenceMap = new HashMap<>();
-        HashMap<String, Object> fenceMap2 = new HashMap<>();
+    }
 
-        fenceMap.put("name","block1");
-        fenceMap.put("latitude","37.438447610822294");
-        fenceMap.put("longitude","126.68807230889799");
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.i("TAGAdminMapActivity","=======onPause==========");
 
-        fenceMap2.put("name","block2");
-        fenceMap2.put("latitude","37.438437494782775");
-        fenceMap2.put("longitude","126.68697830289602");
+        if(firstMapStarted) {
+            //위치정보 연결 확인
+            if (mGoogleApiClient != null && mGoogleApiClient.isConnected()
+                    && mRequestingLocationUpdates) { //업데이트 되고 있다면
+                Log.i("TAGAdminMapActivity", "=======stopLocationUpdates==========");
 
-        fencesList.add(fenceMap);
-        fencesList.add(fenceMap2);
+                //중지하라(백그라운드에서 돌 필요 없음)
+                stopLocationUpdates();
+            }
 
 
-        mapsPreference = ApplicationMaps.getMapsPreference();
+            //그리고 연결을 끊어라
+            if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
+                Log.i("TAGAdminMapActivity", "=======disconnect==========");
+                mGoogleApiClient.disconnect();
+            }
+        }
+
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+    }
+
+    @Override
+    public void onBackPressed() {
+        new AlertDialog.Builder(this)
+                .setTitle("위치서비스가 종료됩니다. \n종료하시겠습니까?")
+                .setPositiveButton("확인",
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog,
+                                                int which) {
+
+                                finish();
+                            }
+                        })
+                .setNegativeButton("취소",
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog,
+                                                int which) {
+                            }
+                        }).show();
+
+
+    }
+
+    @Override
+    public void onRestoreInstanceState(Bundle savedInstanceState) {
+        //mTextView.setText(savedInstanceState.getString(TEXT_VIEW_KEY));
+    }
+
+    // invoked when the activity may be temporarily destroyed, save the instance state here
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        //outState.putString(GAME_STATE_KEY, mGameState);
+        //outState.putString(TEXT_VIEW_KEY, mTextView.getText());
+
+        // call superclass to save any view hierarchy
+        super.onSaveInstanceState(outState);
+    }
+
+    /**
+     * 위치정보 사용 관련 초기화
+     */
+    private void initGeoService(){
+
+        //mapsPreference = ApplicationMaps.getMapsPreference();
         googleMapPakage = new GoogleMapPakage();
 
 
@@ -126,39 +251,33 @@ public class AdminMapActivity extends FragmentActivity {
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.mapFragment);
+        //맵 스타트
         mapFragment.getMapAsync(googleMapPakage);
-
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-    }
-
-    @Override
-    public void onBackPressed() {
-        finish();
     }
 
 
     //위치정보 서비스 시작
     private void startLocationMachine() throws SecurityException{
 
-        if(ApplicationMaps.getPermissionsMachine().locationPermissionCheck()){
+        //M 이상에서 권한 관련 적용됨
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (ApplicationMaps.getPermissionsMachine().locationPermissionCheck()) {
 
+                //아래의 셋팅후 부터 onChangeUpdate를 타게 된다
+                LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, locationRequest, googleMapPakage);
+                mRequestingLocationUpdates = true;
+                mGoogleMap.setMyLocationEnabled(true);
+
+            } else {
+                Log.d(TAG, "===startLocationMachine=== : 위치정보 권한 없음 ");
+                Toast.makeText(this, "위치정보 권한이 없습니다", Toast.LENGTH_SHORT).show();
+                return;
+            }
+        }else{
             //아래의 셋팅후 부터 onChangeUpdate를 타게 된다
             LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, locationRequest, googleMapPakage);
             mRequestingLocationUpdates = true;
             mGoogleMap.setMyLocationEnabled(true);
-
-        }else{
-            Log.d(TAG, "===startLocationMachine=== : 위치정보 권한 없음 ");
-            return;
         }
 
     }
@@ -198,7 +317,7 @@ public class AdminMapActivity extends FragmentActivity {
 
             //mGoogleMap.getUiSettings().setZoomControlsEnabled(false);
             mGoogleMap.getUiSettings().setMyLocationButtonEnabled(true);
-            mGoogleMap.animateCamera(CameraUpdateFactory.zoomTo(15));
+            mGoogleMap.animateCamera(CameraUpdateFactory.zoomTo(10));
 
             mGoogleMap.setOnMyLocationButtonClickListener(new GoogleMap.OnMyLocationButtonClickListener(){
 
@@ -233,7 +352,7 @@ public class AdminMapActivity extends FragmentActivity {
                     Log.i(TAG,"===onCameraMoveStarted=== : " + i);
                     if (mMoveMapByUser == true && mRequestingLocationUpdates){
 
-                        //사용자가 화면이동시 onChangedUpdate 콜백에서의 위치이동은 막는다
+                        //사용자가 화면이동시 onChangedUpdate 콜백에서오는 위치이동은 막는다
                         Log.d(TAG, "===onCameraMove=== : 카메라 이동 비활성화");
                         mMoveMapByAPI = false;
                     }
@@ -251,10 +370,12 @@ public class AdminMapActivity extends FragmentActivity {
                 }
             });
 
-            Log.d(TAG, "====onresume : connect start=====");
+            Log.d(TAG, "====map ready connect start=====");
             if (!mGoogleApiClient.isConnected()) {
                 mGoogleApiClient.connect();
             }
+
+            firstMapStarted = true;
 
         }
 
@@ -368,6 +489,13 @@ public class AdminMapActivity extends FragmentActivity {
         //지오펜스 설정(펜스 영역 지도상에 이미지로 표현하고 펜스셋팅은 따로 구현됨)
         public void setGeoPencingLocation() {
 
+            //지오펜스셋팅
+            if(geofencesExecute == null) {
+                geofencesExecute = new GeofencingExecutor(AdminMapActivity.this, fenceList);
+            }
+
+            List<Map<String, Object>> fencesList = geofencesExecute.fencesList;
+
             for(int i=0 ; i<fencesList.size(); i++){
 
                 Location geoPenceLocation = new Location("");
@@ -415,9 +543,6 @@ public class AdminMapActivity extends FragmentActivity {
 
 
             }
-
-            //지오펜스셋팅
-            geofencesExecute = new GeoMainActivity();
 
         }
 
@@ -473,205 +598,264 @@ public class AdminMapActivity extends FragmentActivity {
     }
 
 
+    //========= 데이터 로드 http connect =========================================================
+    /**
+     * 선택한 스키장별 펜스 블록 데이터를 가져온다.
+     *
+     * requestFenceBlockData
+     *
+     */
+    private void requestFenceBlockData(){
 
-    //===========================================================================
-    //===========================GEO FENCES LINE=================================
-    //===========================================================================
+        showHideLoadingBar("show");
 
-    public class GeoMainActivity implements OnCompleteListener<Void> {
-
-        private GeofencingClient mGeofencingClient;
-        private ArrayList<Geofence> mGeofenceList;
-        private PendingIntent mGeofencePendingIntent;
-        private PendingGeofenceTask mPendingGeofenceTask = PendingGeofenceTask.NONE;
+        //실제 로직
+        preGeoDataProcess();
+    }
 
 
-        public GeoMainActivity() {
-            //리스트 초기화
-            mGeofenceList = new ArrayList<>();
-            mGeofencePendingIntent = null;
 
-            //지오펜스 리스트 생성
-            buildGeofenceList();
+    /**
+     * http 요청 메서드
+     *
+     */
+    private void preGeoDataProcess() {
+        String urlStr = "";
+        String authJsonStr = "";
 
-            //init
-            mGeofencingClient = LocationServices.getGeofencingClient(AdminMapActivity.this);
+        try {
 
-            //권한 확인후
-            if (ApplicationMaps.getApps().isFineLocationPermit()
-                    && ApplicationMaps.getApps().isCoarseLocationPermit()) {
-                //시작
-                mPendingGeofenceTask = PendingGeofenceTask.ADD;
-                performPendingGeofenceTask();
+            urlStr = ApplicationMaps.restApiUrl + "/geoDataList?selectedResort=" + mapsPreference.getSelectedSkiResortCode();
+            getHttpData(urlStr); //서버통신
+
+            //Log.i("LOGINTAG","doInBackground : " + authStr);
+        }catch (Exception e){
+            e.printStackTrace();
+            Snackbar snackbar = Snackbar.make(adminMapLayout, "데이터 로드중 문제 발생", Snackbar.LENGTH_LONG);
+            snackbar.show();
+            showHideLoadingBar("hide");
+        }
+
+    }
+
+
+    /**
+     * 요청 후처리 (response 후 로직)
+     * postGeoDataProcess
+     * @param jsonStr
+     */
+    private void postGeoDataProcess(String jsonStr) {
+
+        //기본적인 값 필터링
+        String resultJsonStr = "";
+        resultJsonStr = jsonStr.replaceAll("\n","");
+        resultJsonStr = resultJsonStr.replaceAll("\r","");
+        resultJsonStr = resultJsonStr.trim();
+        if(resultJsonStr.equals("[]")){
+            resultJsonStr = "";
+        }
+
+        //에러가 아니라면 처리
+        if(resultJsonStr != null && !resultJsonStr.equals("err500")){
+            if(resultJsonStr != "") {
+                final String resultParam = resultJsonStr;
+
+                workerHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        callbackDataProcess(resultParam);
+                    }
+                });
+
+
+            }else{
+                Snackbar snackbar = Snackbar.make(adminMapLayout, "데이터 로드에 실패하였습니다.", Snackbar.LENGTH_LONG);
+                snackbar.show();
+
+                showHideLoadingBar("hide");
+                return;
             }
+        }else if(resultJsonStr != null && resultJsonStr.equals("err500")) { //에러가 발생했다면
+
+            Snackbar snackbar = Snackbar.make(adminMapLayout, "서버와 통신중 문제가 발생하였습니다.", Snackbar.LENGTH_LONG);
+            snackbar.show();
+
+            showHideLoadingBar("hide");
+            return;
+        }else{
+            Snackbar snackbar = Snackbar.make(adminMapLayout, "서버와 통신중 문제가 발생하였습니다.", Snackbar.LENGTH_LONG);
+            snackbar.show();
+
+            showHideLoadingBar("hide");
+            return;
 
         }
 
-        private void performPendingGeofenceTask() {
-            if (mPendingGeofenceTask == PendingGeofenceTask.ADD) {
-                addGeofences();
-            } else if (mPendingGeofenceTask == PendingGeofenceTask.REMOVE) {
-                removeGeofences();
-            }
-        }
+    }
 
 
-        private GeofencingRequest getGeofencingRequest() {
-            GeofencingRequest.Builder builder = new GeofencingRequest.Builder();
 
-            // The INITIAL_TRIGGER_ENTER flag indicates that geofencing service should trigger a
-            // GEOFENCE_TRANSITION_ENTER notification when the geofence is added and if the device
-            // is already inside that geofence.
-            builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER |
-                    GeofencingRequest.INITIAL_TRIGGER_EXIT);
+    /**
+     * callbackJoinProcess 인증후 콜백 메서드
+     * @param resultStr
+     */
+    private void callbackDataProcess(String resultStr){
 
-            // Add the geofences to be monitored by geofencing service.
-            builder.addGeofences(mGeofenceList);
+        String dataSuccess = "F";
+        showHideLoadingBar("hide");
 
-            // Return a GeofencingRequest.
-            return builder.build();
-        }
+        try {
+            if(resultStr != null && !resultStr.equals("")){
 
+                JSONArray jsonArray = new JSONArray(resultStr);
+                //정보[0]
+                for (int i = 0; i < jsonArray.length(); i++) {
 
-        /**
-         * Adds geofences. This method should be called after the user has granted the location
-         * permission.
-         */
-        @SuppressWarnings("MissingPermission")
-        private void addGeofences() {
-            mGeofencingClient.addGeofences(getGeofencingRequest(), getGeofencePendingIntent())
-                    .addOnCompleteListener(this);
-        }
+                    JSONObject jo = jsonArray.getJSONObject(i);
 
+                    //여기에 돌리면서 펜스 정보 로직 추가
+                    Map<String, Object> blockMap = new HashMap<>();
+                    blockMap.put("skiResortCode", jo.getString("skiResortCode"));
+                    blockMap.put("blockCode", jo.getString("blockCode"));
+                    blockMap.put("name", jo.getString("name"));
+                    blockMap.put("meter", jo.getString("meter"));
+                    blockMap.put("latitude", jo.getString("latitude"));
+                    blockMap.put("longitude", jo.getString("longitude"));
 
-        /**
-         * Removes geofences. This method should be called after the user has granted the location
-         * permission.
-         */
-        @SuppressWarnings("MissingPermission")
-        private void removeGeofences() {
-            mGeofencingClient.removeGeofences(getGeofencePendingIntent()).addOnCompleteListener(this);
-        }
-
-        public void requestRemoveGeoFences() {
-            mPendingGeofenceTask = PendingGeofenceTask.REMOVE;
-            performPendingGeofenceTask();
-        }
-
-
-        /**
-         * Runs when the result of calling {@link #addGeofences()} and/or {@link #removeGeofences()}
-         * is available.
-         *
-         * @param task the resulting Task, containing either a result or error.
-         */
-        @Override
-        public void onComplete(@NonNull Task<Void> task) {
-            if (task.isSuccessful()) {
-
-                //callback logic
-                if (mPendingGeofenceTask == PendingGeofenceTask.ADD) {
-                    mPendingGeofenceTask = PendingGeofenceTask.ADDED;
-                    Log.i(TAG, "===onComplete=== : 지오펜스 추가 완료");
-                } else if (mPendingGeofenceTask == PendingGeofenceTask.REMOVE) {
-                    mPendingGeofenceTask = PendingGeofenceTask.REMOVED;
-                    Log.i(TAG, "===onComplete=== : 지오펜스 제거 완료");
+                    fenceList.add(blockMap);
+                    dataSuccess = "T";
                 }
 
-            } else {
-                // Get the status code for the error and log it using a user-friendly message.
-                String errorMessage = GeofenceErrorMessages.getErrorString(AdminMapActivity.this, task.getException());
-                Log.w(TAG, errorMessage);
             }
 
+            //데이터 불러온 뒤 위치 정보 서비스 초기화 시작
+            initGeoService();
+
+        }catch(Exception e){
+            e.printStackTrace();
+
+            Snackbar snackbar = Snackbar.make(adminMapLayout, "서버와 통신중 문제가 발생하였습니다.", Snackbar.LENGTH_LONG);
+            snackbar.show();
+
+            showHideLoadingBar("hide");
         }
 
-        /**
-         * Gets a PendingIntent to send with the request to add or remove Geofences. Location Services
-         * issues the Intent inside this PendingIntent whenever a geofence transition occurs for the
-         * current list of geofences.
-         *
-         * @return A PendingIntent for the IntentService that handles geofence transitions.
-         */
-        //지오펜스 인텐트 서비스 셋팅
-        private PendingIntent getGeofencePendingIntent() {
-            // Reuse the PendingIntent if we already have it.
-            if (mGeofencePendingIntent != null) {
-                return mGeofencePendingIntent;
+    }
+
+
+
+    /**
+     * 해당 페이지를 가져온다.
+     * okHttp 를 사용하여 작성(새로운 쓰레드가 생성됨)
+     * 메인쓰레드와 따로 생각해서 작성해야함
+     *
+     * getHttpData
+     *
+     * @param page
+     * @return
+     * @throws Exception
+     */
+    public void getHttpData(String page) {
+
+        OkHttpClient client = new OkHttpClient();
+
+        //request
+        Request request = new Request.Builder()
+                .url(page)
+                .get()
+                .build();
+
+        try {
+            client.newCall(request).enqueue(new Callback() {
+
+                @Override
+                public void onFailure(Call call, IOException e){
+                    e.printStackTrace();
+
+                    Snackbar snackbar = Snackbar.make(adminMapLayout, "서버와 통신중 문제가 발생하였습니다.", Snackbar.LENGTH_LONG);
+                    snackbar.show();
+
+                    showHideLoadingBar("hide");
+
+                }
+
+                @Override
+                public void onResponse(Call call, final Response response) throws IOException {
+                    //받은 정보들로 후처리 구현
+                    postGeoDataProcess(response.body().string());
+
+
+
+                }
+
+            });
+
+        } catch (Exception e) {
+            e.printStackTrace();
+
+            Snackbar snackbar = Snackbar.make(adminMapLayout, "서버와 통신중 문제가 발생하였습니다.", Snackbar.LENGTH_LONG);
+            snackbar.show();
+
+        }finally {
+            //final logic
+
+            showHideLoadingBar("hide");
+        }
+
+    }
+
+
+
+
+    //==============================================================================================
+
+
+    private void showHideLoadingBar(final String type){
+        workerHandler.post(new Runnable() {
+            @Override
+            public void run() {
+
+                if(loadingLayout != null) {
+                    if(type.equals("show")) {
+                        loadingLayout.setVisibility(View.VISIBLE);
+                    }else{
+                        loadingLayout.setVisibility(View.GONE);
+                    }
+                }
+
             }
-            Intent intent = new Intent(AdminMapActivity.this, GeofenceTransitionsIntentService.class);
-            // We use FLAG_UPDATE_CURRENT so that we get the same pending intent back when calling
-            // addGeofences() and removeGeofences().
-            mGeofencePendingIntent = PendingIntent.getService(AdminMapActivity.this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-            return mGeofencePendingIntent;
-        }
-
-        //지오펜스 리스트 생성
-        private void buildGeofenceList() {
-
-            //펜스정보 리스트 만큼 펜스빌드 리스트 생성
-            for (int i=0; i<fencesList.size(); i++){
-                final Map<String, Object> block = fencesList.get(i);
-
-                mGeofenceList.add(new Geofence.Builder()
-                        // Set the request ID of the geofence. This is a string to identify this
-                        // geofence.
-                        .setRequestId(block.get("name").toString())
-
-                        // Set the circular region of this geofence.
-                        .setCircularRegion(
-                                Double.parseDouble(block.get("latitude").toString()), //lati
-                                Double.parseDouble(block.get("longitude").toString()),  //lot
-                                20 //meter
-                        )
-
-                        // Set the expiration duration of the geofence. This geofence gets automatically
-                        // removed after this period of time.
-
-                        //12 시간후에 삭제 (수정해야함)
-                        .setExpirationDuration(12 * 60 * 60 * 1000)
-
-                        // Set the transition types of interest. Alerts are only generated for these
-                        // transition. We track entry and exit transitions in this sample.
-                        .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER |
-                                Geofence.GEOFENCE_TRANSITION_EXIT)
-
-                        // Create the geofence.
-                        .build());
-            }
-
-        }
+        });
 
 
     }
+
+
+
+
 
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
 
-        //위치정보 업데이트종료
-        if (mRequestingLocationUpdates) {
+        Log.i("TAGAdminMapActivity","=======on Destroy==========");
 
-            Log.d(TAG, "===onDestroy : stopLocationUpdate===");
-            stopLocationUpdates();
-        }
-
-        //연결 종료
-        if ( mGoogleApiClient.isConnected()) {
-
-            Log.d(TAG, "===onDestroy=== : disconnected");
-            mGoogleApiClient.disconnect();
-        }
-
-        //removeGeofences
-        if(geofencesExecute != null) {
+        //화면과 지오펜싱을 동기화시킴
+        if(geofencesExecute != null){
             geofencesExecute.requestRemoveGeoFences();
+            Log.i("TAGAdminMapActivity","=======requestRemoveGeoFences==========");
         }
 
+        if(mGoogleApiClient != null && mGoogleApiClient.isConnected()
+                && mRequestingLocationUpdates){
+            stopLocationUpdates();
+            Log.i("TAGAdminMapActivity","=======stopLocationUpdates==========");
+        }
+
+        if (mGoogleApiClient != null &&  mGoogleApiClient.isConnected()) {
+            mGoogleApiClient.disconnect();
+            Log.i("TAGAdminMapActivity","=======mGoogleApiClient.disconnect==========");
+        }
 
     }
-
-
 }
