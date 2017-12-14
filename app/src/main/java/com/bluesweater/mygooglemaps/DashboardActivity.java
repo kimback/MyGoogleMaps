@@ -25,8 +25,6 @@ import android.widget.Toast;
 import com.bluesweater.mygooglemaps.core.ApplicationMaps;
 import com.bluesweater.mygooglemaps.core.MapsPreference;
 
-import layout.NaviDrawFragment;
-
 public class DashboardActivity extends AppCompatActivity {
     private Toolbar toolbar;
     private TextView titleText;
@@ -42,6 +40,7 @@ public class DashboardActivity extends AppCompatActivity {
     public static final int DISPLAY_CONTENT_APP_SETTING = 2;
     public static final int DISPLAY_CONTENT_APP_LOGOUT = 3;
     public static final int DISPLAY_CONTENT_GOGO_SNOW_PARK_CHANGE = 4;
+    public static final int DISPLAY_CONTENT_GROUP_CREATE = 5;
 
 
     @Override
@@ -265,11 +264,10 @@ public class DashboardActivity extends AppCompatActivity {
         String url = "";
         //메인 컨텐츠 로드
         if(type.equals("MYDATA")){
-            url = ApplicationMaps.mydataUrl;
+            //private rank
+            url = ApplicationMaps.mydataUrl + "?userId=" + pref.getLoginId();
         }else{
-            //main
-            //rank
-
+            //main total rank
             url = ApplicationMaps.mainUrl;
         }
         //+ "&selectedSkiResort=" + pref.getSelectedSkiResort() + "&userId=" + userId;
@@ -306,6 +304,7 @@ public class DashboardActivity extends AppCompatActivity {
         mainViewShow("MAIN");
         //네비드로우 셋팅 (디폴트 드로우 메뉴 사용시)
         //setupNaviDrawer(drawerLayout);
+
     }
 
     /**
@@ -334,7 +333,7 @@ public class DashboardActivity extends AppCompatActivity {
 
                 currDisplay = display;
 
-                //권한별 화면이 다르다
+                //권한별 화면이 다르게 하려했으나 그냥 똑같이...
                 Intent i = null;
                 //if(pref.getLoginId().equals("kimback1")){
                     i = new Intent(this, AdminMapActivity.class);
@@ -346,6 +345,22 @@ public class DashboardActivity extends AppCompatActivity {
                 startActivity(i);
 
                 break;
+
+
+            case DISPLAY_CONTENT_GROUP_CREATE :
+
+
+                //그룹 생성 화면
+                currDisplay = display;
+                contentFragment = new GroupManagerFragment();
+
+                Bundle bundle2 = new Bundle();
+                bundle2.putString("title", title);
+                //contentFragment.setArguments(bundle2);
+
+                chageFragmentView(contentFragment);
+                break;
+
 
             case DISPLAY_CONTENT_APP_SETTING :
                 //앱 설정

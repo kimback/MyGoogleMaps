@@ -63,9 +63,9 @@ public class UserMapActivity extends FragmentActivity {
             public void onClick(View view) {
 
                 //지오펜스셋팅
-                if(geofencesExecute == null){
-                    geofencesExecute = new GeofencingExecutor(UserMapActivity.this, null);
-                }
+                //if(geofencesExecute == null){
+                    //geofencesExecute = new GeofencingExecutor(UserMapActivity.this, null);
+                //}
 
                 geofencesExecute.requestAddGeoFences();
 
@@ -100,7 +100,7 @@ public class UserMapActivity extends FragmentActivity {
         mapsPreference = ApplicationMaps.getMapsPreference();
 
         //지오펜싱 초기화
-        geofencesExecute = new GeofencingExecutor(this, null);
+        //geofencesExecute = new GeofencingExecutor(this, null);
         //ApplicationMaps.getApps().setGeofencingExecutor(geofencesExecute);
 
     }

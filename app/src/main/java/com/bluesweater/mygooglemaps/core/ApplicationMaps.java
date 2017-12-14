@@ -36,12 +36,23 @@ public class ApplicationMaps extends Application{
     private boolean coarseLocationPermit = false;
     private boolean gpsNetworkPermit = true;
 
+    //서버용
     //메인 대쉬보드 URL
-    public static final String mainUrl = "http://192.168.0.3:8080/webapp/snowGoGoHello";
+    public static final String mainUrl = "http://kimback04.cafe24.com/SNOWGOGO/snowGoGoHello";
     //사용자 정보 화면 URL
-    public static final String mydataUrl = "http://192.168.0.3:8080/webapp/snowGoGoUserData";
+    public static final String mydataUrl = "http://kimback04.cafe24.com/SNOWGOGO/snowGoGoUserData";
     //서버와 통신 URL
-    public static final String restApiUrl = "http://192.168.0.3:8080/webapp/snowGoGoRESTApi";
+    public static final String restApiUrl = "http://kimback04.cafe24.com/SNOWGOGO/snowGoGoRESTApi";
+
+    //로컬용
+    //메인 대쉬보드 URL
+    //public static final String mainUrl = "http://192.168.0.3:8080/webapp/snowGoGoHello";
+    //사용자 정보 화면 URL
+    //public static final String mydataUrl = "http://192.168.0.3:8080/webapp/snowGoGoUserData";
+    //서버와 통신 URL
+    //public static final String restApiUrl = "http://192.168.0.3:8080/webapp/snowGoGoRESTApi";
+
+
 
     @Override
     public void onCreate() {

@@ -1,4 +1,4 @@
-package layout;
+package com.bluesweater.mygooglemaps;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -12,8 +12,6 @@ import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.bluesweater.mygooglemaps.DashboardActivity;
-import com.bluesweater.mygooglemaps.R;
 import com.bluesweater.mygooglemaps.core.ApplicationMaps;
 import com.bluesweater.mygooglemaps.core.MapsPreference;
 
@@ -155,19 +153,27 @@ public class NaviDrawFragment extends Fragment {
                 //프로필 클릭시 처리
                 break;
 
-            //전체전투력 (웹뷰)
+            //전체전투력 (웹뷰) total rank
             case R.id.navi_menu_btn0 :
                 //menuItem.setChecked(true);
                 mDrawerLayout.closeDrawers();
                 context.mainViewShow("RANK");
                 break;
 
-            //개인전투력(웹뷰)
+            //개인전투력(웹뷰) private rank
             case R.id.navi_menu_btn1 :
                 //menuItem.setChecked(true);
                 mDrawerLayout.closeDrawers();
                 context.mainViewShow("MYDATA");
                 break;
+
+            //개인전투력(웹뷰) private rank
+            case R.id.navi_menu_btn10 :
+                //menuItem.setChecked(true);
+                mDrawerLayout.closeDrawers();
+                context.displayContent(DashboardActivity.DISPLAY_CONTENT_GROUP_CREATE, "", "그룹관리");
+                break;
+
 
             //전투력측정기
             case R.id.navi_menu_btn2 :

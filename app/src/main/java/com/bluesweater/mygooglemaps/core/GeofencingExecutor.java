@@ -226,7 +226,7 @@ public class GeofencingExecutor implements OnCompleteListener<Void> {
 
                             dLati, //lati
                             dLongi,  //lot
-                            20 //meter
+                            50 //meter
                     )
 
                     // Set the expiration duration of the geofence. This geofence gets automatically

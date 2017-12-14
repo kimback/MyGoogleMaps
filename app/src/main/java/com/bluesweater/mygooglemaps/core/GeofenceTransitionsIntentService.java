@@ -99,14 +99,13 @@ public class GeofenceTransitionsIntentService extends IntentService {
             String geofenceTransitionDetails = getGeofenceTransitionDetails(geofenceTransition,
                     triggeringGeofences);
 
-            // Send notification and log the transition details.
+
             sendNotification(geofenceTransitionDetails);
             Log.i(TAG, geofenceTransitionDetails);
 
-
-            requestBlockDataUpdate(triggeringGeofences);
-
-
+            if(geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER){
+                requestBlockDataUpdate(triggeringGeofences);
+            }
 
         } else {
             // Log the error.
@@ -227,7 +226,6 @@ public class GeofenceTransitionsIntentService extends IntentService {
             //Log.i("LOGINTAG","doInBackground : " + authStr);
         }catch (Exception e){
             e.printStackTrace();
-
         }
     }
 

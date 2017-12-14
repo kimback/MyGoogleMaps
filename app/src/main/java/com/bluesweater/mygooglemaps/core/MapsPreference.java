@@ -13,6 +13,7 @@ public class MapsPreference {
     private int versionInt;
     private boolean saveLogin;
     private String loginId;
+    private String myGroup;
     private String selectedSkiResortCode;
     private String selectedSkiResortName;
 
@@ -25,6 +26,7 @@ public class MapsPreference {
         versionInt = pref.getInt("versionInt", 1000);
         saveLogin = pref.getBoolean("saveLogin", true);
         loginId = pref.getString("loginId", "");
+        myGroup = pref.getString("myGroup", "");
         selectedSkiResortCode = pref.getString("selectedSkiResortCode", "");
         selectedSkiResortName = pref.getString("selectedSkiResortName", "");
 
@@ -56,6 +58,13 @@ public class MapsPreference {
         this.loginId = loginId;
     }
 
+    public String getMyGroup() {
+        return myGroup;
+    }
+
+    public void setMyGroup(String myGroup) {
+        this.myGroup = myGroup;
+    }
 
     public String getSelectedSkiResortCode() {
         return selectedSkiResortCode;
@@ -82,6 +91,7 @@ public class MapsPreference {
         edit.putString("loginId", loginId);
         edit.putString("selectedSkiResortCode", selectedSkiResortCode);
         edit.putString("selectedSkiResortName", selectedSkiResortName);
+        edit.putString("myGroup",myGroup);
 
 
         edit.commit();

@@ -434,24 +434,37 @@ public class LoginWorkActivity extends AppCompatActivity {
                 for (int i = 0; i < jsonArray.length(); i++) {
 
                     JSONObject jo = jsonArray.getJSONObject(i);
-                    if(jo.get("loginAuth").toString().equals("T")){
+                    //로그인 성공 처리
+                    if(jo.get("loginAuth").toString().equals("LT")){
 
                         //로그인 성공! 아이디저장!
                         mapsPreference.setLoginId(uId);
                         mapsPreference.appPrefSave();
                         loginSuccess = "T";
 
-                    }else{
+                    //로그인 실패 (아이디나, 패스워드 틀림)
+                    }else if(jo.get("loginAuth").toString().equals("LF")){
+                        if(alertCanvas != null) {
+                            alertCanvas.setVisibility(View.VISIBLE);
+                        }
+                        workerHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                hideSoftKeyboard();
+                                //패스워드 틀림
+                                Snackbar snackbar = Snackbar.make(alertCanvas,
+                                        "패스워드가 틀렸습니다. 다시 로그인 해주세요. ", Snackbar.LENGTH_LONG);
+                                snackbar.show();
+                            }
+                        });
+
+                    //로그인 실패 아이디 없음 -> 가입처리
+                    }else if(jo.get("loginAuth").toString().equals("F")){
                         mapsPreference.setLoginId("");
                         mapsPreference.appPrefSave();
 
-                        //Snackbar snackbar = Snackbar.make(alertCanvas,
-                                //"패스워드가 틀렸거나, 등록되있지 않습니다. 등록 하시겠습니까?", Snackbar.LENGTH_LONG);
-                        //snackbar.show();
-
                         new AlertDialog.Builder(this)
-                                .setTitle("패스워드가 틀렸거나, " +
-                                        "등록되있지 않습니다. 등록 하시겠습니까?")
+                                .setTitle("미등록 사용자 입니다. 등록 하시겠습니까?")
                                 .setPositiveButton("확인",
                                         new DialogInterface.OnClickListener() {
                                             @Override
@@ -495,6 +508,16 @@ public class LoginWorkActivity extends AppCompatActivity {
 
                                     .show();
 
+                    }else{
+                        hideSoftKeyboard();
+                        if(alertCanvas != null) {
+                            alertCanvas.setVisibility(View.VISIBLE);
+                        }
+                        Snackbar snackbar = Snackbar.make(alertCanvas,
+                                "로그인 처리에 문제가 발생하였습니다.", Snackbar.LENGTH_LONG);
+                        snackbar.show();
+                        return;
+                        //그외 처리
                     }
 
 
@@ -505,7 +528,7 @@ public class LoginWorkActivity extends AppCompatActivity {
         }catch(Exception e){
 
             e.printStackTrace();
-
+            hideSoftKeyboard();
             Snackbar snackbar = Snackbar.make(alertCanvas, "로그인처리중 문제가 발생하였습니다.", Snackbar.LENGTH_LONG);
             snackbar.show();
 

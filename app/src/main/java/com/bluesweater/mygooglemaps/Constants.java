@@ -24,10 +24,23 @@ import java.util.HashMap;
  * Constants used in this sample.
  */
 
-final class Constants {
+public final class Constants {
 
     private Constants() {
     }
+
+    public interface ACTION {
+        public static String MAIN_ACTION = "com.bluesweater.mygooglemaps.foregroundservice.action.main";
+        public static String PREV_ACTION = "com.bluesweater.mygooglemaps.foregroundservice.action.prev";
+        public static String STARTFOREGROUND_ACTION = "com.truiton.foregroundservice.action.startforeground";
+        public static String STOPFOREGROUND_ACTION = "com.truiton.foregroundservice.action.stopforeground";
+    }
+
+    public interface NOTIFICATION_ID {
+        public static int FOREGROUND_SERVICE = 101;
+    }
+
+
 
     private static final String PACKAGE_NAME = "com.bluesweater.mygooglemaps";
 

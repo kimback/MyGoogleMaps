@@ -63,7 +63,7 @@
     <!-- custom draw navi -->
     <fragment
         android:id="@+id/fragment_navi"
-        android:name="layout.NaviDrawFragment"
+        android:name="com.bluesweater.mygooglemaps.NaviDrawFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="start"
