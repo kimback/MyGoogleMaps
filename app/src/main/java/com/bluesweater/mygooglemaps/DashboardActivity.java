@@ -356,7 +356,7 @@ public class DashboardActivity extends AppCompatActivity {
 
                 Bundle bundle2 = new Bundle();
                 bundle2.putString("title", title);
-                //contentFragment.setArguments(bundle2);
+                contentFragment.setArguments(bundle2);
 
                 chageFragmentView(contentFragment);
                 break;

@@ -3,28 +3,44 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/admin_map_layout">
+    android:id="@+id/admin_map_layout"
+    android:background="@color/background_white">
 
-<!--로딩뷰-->
-<RelativeLayout
-    android:id="@+id/loading_bar_layout"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/loadingbar_backgroud"
-    android:clickable="true"
-    android:visibility="gone">
-    <ProgressBar
-        android:id="@+id/prog_bar1"
-        android:layout_width="70dp"
-        android:layout_height="70dp"
-        android:layout_centerInParent="true"/>
-</RelativeLayout>
+
+
+    <!--로딩뷰-->
+    <RelativeLayout
+        android:id="@+id/loading_bar_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/mapLoading_backgroud"
+        android:clickable="true"
+        android:visibility="visible">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="20sp"
+            android:text="전투력 측정중 입니다..."
+            android:layout_above="@+id/prog_bar1"
+            android:layout_centerInParent="true"
+            android:layout_marginBottom="10dp"/>
+        <ProgressBar
+            android:id="@+id/prog_bar1"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:layout_centerInParent="true"/>
+    </RelativeLayout>
+
+
 
 <fragment
     android:name="com.google.android.gms.maps.SupportMapFragment"
     android:id="@+id/mapFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/background_white"
     tools:context="com.bluesweater.mygooglemaps.AdminMapActivity" />
+
+
 
 </LinearLayout>

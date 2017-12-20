@@ -99,11 +99,9 @@ public class GeofenceTransitionsIntentService extends IntentService {
             String geofenceTransitionDetails = getGeofenceTransitionDetails(geofenceTransition,
                     triggeringGeofences);
 
-
-            sendNotification(geofenceTransitionDetails);
-            Log.i(TAG, geofenceTransitionDetails);
-
             if(geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER){
+                //sendNotification(geofenceTransitionDetails);
+                Log.i(TAG, geofenceTransitionDetails);
                 requestBlockDataUpdate(triggeringGeofences);
             }
 

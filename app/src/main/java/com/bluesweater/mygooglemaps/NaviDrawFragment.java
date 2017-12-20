@@ -27,6 +27,7 @@ public class NaviDrawFragment extends Fragment {
     private RelativeLayout naviMenuBtn1;
     private RelativeLayout naviMenuBtn2;
     private RelativeLayout naviMenuBtn9;
+    private RelativeLayout naviMenuBtn10;
     private RelativeLayout naviMenuLogout;
     private TextView txtUserId;
 
@@ -144,6 +145,13 @@ public class NaviDrawFragment extends Fragment {
             }
         });
 
+        naviMenuBtn10 = (RelativeLayout) v.findViewById(R.id.navi_menu_btn10);
+        naviMenuBtn10.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                clickAction(v);
+            }
+        });
     }
 
     private void clickAction(View v){
@@ -167,11 +175,11 @@ public class NaviDrawFragment extends Fragment {
                 context.mainViewShow("MYDATA");
                 break;
 
-            //개인전투력(웹뷰) private rank
+            //그룹관리화면
             case R.id.navi_menu_btn10 :
-                //menuItem.setChecked(true);
-                mDrawerLayout.closeDrawers();
-                context.displayContent(DashboardActivity.DISPLAY_CONTENT_GROUP_CREATE, "", "그룹관리");
+                //준비중 . . .
+                //mDrawerLayout.closeDrawers();
+                //context.displayContent(DashboardActivity.DISPLAY_CONTENT_GROUP_CREATE, "", "그룹관리");
                 break;
 
 

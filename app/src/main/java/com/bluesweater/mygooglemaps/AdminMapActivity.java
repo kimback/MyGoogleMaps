@@ -161,7 +161,7 @@ public class AdminMapActivity extends FragmentActivity {
 
         // 이 동작으로 인해 백그라운드 진입시 지오펜싱이 동작안하는 현상이 있음
         // 지오 펜싱에서 내부적으로는 Google api (mGoogleApiClient) 커넥션이 물려있는것으로 생각됨
-        /*
+
         if(firstMapStarted) {
             //위치정보 연결 확인
             if (mGoogleApiClient != null && mGoogleApiClient.isConnected()
@@ -174,11 +174,11 @@ public class AdminMapActivity extends FragmentActivity {
 
 
             //그리고 연결을 끊어라
-            if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
+            /*if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
                 Log.i("TAGAdminMapActivity", "=======disconnect==========");
                 mGoogleApiClient.disconnect();
-            }
-        }*/
+            }*/
+        }
 
     }
 
@@ -387,7 +387,7 @@ public class AdminMapActivity extends FragmentActivity {
             Log.d(TAG, "===onConnected===");
 
             if(loadingLayout != null){
-                loadingLayout.setVisibility(View.GONE);
+                //loadingLayout.setVisibility(View.GONE);
             }
 
             //업데이트 되고 있지 않다면 시작해라
@@ -822,7 +822,7 @@ public class AdminMapActivity extends FragmentActivity {
                     if(type.equals("show")) {
                         loadingLayout.setVisibility(View.VISIBLE);
                     }else{
-                        loadingLayout.setVisibility(View.GONE);
+                        //loadingLayout.setVisibility(View.GONE);
                     }
                 }
 

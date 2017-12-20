@@ -6,6 +6,7 @@
     <color name="navi_menu_background">#008299</color>
     <color name="navi_sub_menu_background">#008299</color>
     <color name="loadingbar_backgroud">#19000000</color>
+    <color name="mapLoading_backgroud">#4D102063</color>
     <color name="navi_ripple_effect">#014b78</color>
     <color name="navi_ripple_effect2">#1c6590</color>
     <color name="ripple_effect1">#bdbdbd</color>
