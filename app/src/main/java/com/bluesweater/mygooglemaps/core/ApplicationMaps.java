@@ -11,6 +11,7 @@ import com.bluesweater.mygooglemaps.DashboardActivity;
 public class ApplicationMaps extends Application{
     private static ApplicationMaps apps;
     private DashboardActivity dashboardActivity;
+    public GeofencingExecutor geofencesExecute;
 
     //============================================
     // 매니저 변수들
@@ -43,6 +44,10 @@ public class ApplicationMaps extends Application{
     public static final String mydataUrl = "http://kimback04.cafe24.com/SNOWGOGO/snowGoGoUserData";
     //서버와 통신 URL
     public static final String restApiUrl = "http://kimback04.cafe24.com/SNOWGOGO/snowGoGoRESTApi";
+
+    //다른거 테스트
+    //public static final String testUrl = "http://poscoict.gonetis.com:8000/live/media/DESKTOP-BTGESAM/DeviceIpint.1/SourceEndpoint.video:0:1?w=1600&h=0";
+
 
     //로컬용
     //메인 대쉬보드 URL

@@ -85,6 +85,10 @@ public class GeofencingExecutor implements OnCompleteListener<Void> {
 
     }
 
+    public GeofencingClient getGeofencingClient(){
+        return mGeofencingClient;
+    }
+
     private void performPendingGeofenceTask() {
         if (mPendingGeofenceTask == PendingGeofenceTask.ADD) {
             addGeofences();
@@ -120,6 +124,8 @@ public class GeofencingExecutor implements OnCompleteListener<Void> {
         if(mGeofencingClient != null) {
             mGeofencingClient.addGeofences(getGeofencingRequest(), getGeofencePendingIntent())
                     .addOnCompleteListener(this);
+
+
         }
     }
 
@@ -233,7 +239,7 @@ public class GeofencingExecutor implements OnCompleteListener<Void> {
                     // removed after this period of time.
 
                     //12 시간후에 삭제 (수정해야함)
-                    .setExpirationDuration(12 * 60 * 60 * 1000)
+                    .setExpirationDuration(Geofence.NEVER_EXPIRE)
 
                     // Set the transition types of interest. Alerts are only generated for these
                     // transition. We track entry and exit transitions in this sample.

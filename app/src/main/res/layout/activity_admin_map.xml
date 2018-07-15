@@ -1,4 +1,4 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:layout_width="match_parent"
@@ -7,14 +7,23 @@
     android:background="@color/background_white">
 
 
+<fragment
+    android:name="com.google.android.gms.maps.SupportMapFragment"
+    android:id="@+id/mapFragment"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.bluesweater.mygooglemaps.AdminMapActivity" />
+
+
 
     <!--로딩뷰-->
     <RelativeLayout
         android:id="@+id/loading_bar_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/mapLoading_backgroud"
+        android:background="#99FFFFFF"
         android:clickable="true"
+        android:layout_gravity="center_vertical"
         android:visibility="visible">
         <TextView
             android:layout_width="wrap_content"
@@ -33,14 +42,4 @@
 
 
 
-<fragment
-    android:name="com.google.android.gms.maps.SupportMapFragment"
-    android:id="@+id/mapFragment"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/background_white"
-    tools:context="com.bluesweater.mygooglemaps.AdminMapActivity" />
-
-
-
-</LinearLayout>
+</RelativeLayout>
