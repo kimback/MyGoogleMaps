@@ -30,10 +30,10 @@ public final class Constants {
     }
 
     public interface ACTION {
-        public static String MAIN_ACTION = "com.bluesweater.mygooglemaps.foregroundservice.action.main";
-        public static String PREV_ACTION = "com.bluesweater.mygooglemaps.foregroundservice.action.prev";
-        public static String STARTFOREGROUND_ACTION = "com.truiton.foregroundservice.action.startforeground";
-        public static String STOPFOREGROUND_ACTION = "com.truiton.foregroundservice.action.stopforeground";
+        public static String MAIN_ACTION = "MAIN";
+        public static String FOREGROUND_CLICK_ACTION = "CLICK";
+        public static String STARTFOREGROUND_ACTION = "START";
+        public static String STOPFOREGROUND_ACTION = "STOP";
     }
 
     public interface NOTIFICATION_ID {

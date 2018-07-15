@@ -1,6 +1,4 @@
-package com.bluesweater.mygooglemaps;
-
-import android.webkit.WebView;
+package com.posco.fss.smartsafetyapp.ui;
 
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -22,18 +20,23 @@ import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
+import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 
+import com.posco.fss.smartsafetyapp.R;
+import com.posco.fss.smartsafetyapp.core.AppEnv;
 
 /**
  * class WebContentFragment
+ * 각 모듈별 화면중 웹화면을 처리하는 플래그먼트
+ * 대쉬보드, 위험물체크(블루투스)를 빼고 대부분의 모니터링은 웹데이터를 통해 구동한다.
  */
 public class WebContentFragment extends Fragment {
     private WebView webview;
     private ProgressBar progress;
-    private DashboardActivity context;
+    private DashBoardActivity context;
 
     public WebContentFragment() {
     }
@@ -41,7 +44,7 @@ public class WebContentFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        this.context = (DashboardActivity) context;
+        this.context = (DashBoardActivity) context;
     }
 
     @Override
@@ -120,14 +123,10 @@ public class WebContentFragment extends Fragment {
             if (webview.canGoBack()) {
                 webview.goBack();
             } else {
-                DashboardActivity activity = (DashboardActivity) context;
-                activity.mainViewShow("MAIN");
+                DashBoardActivity activity = (DashBoardActivity)context;
+                activity.mainViewShow();
             }
         }
-    }
-
-    public boolean isBackWebpage(){
-        return webview.canGoBack();
     }
 
 
@@ -231,7 +230,6 @@ public class WebContentFragment extends Fragment {
 
                 return true;
             }
-
 
             @Override
             public void onCloseWindow(WebView window) {

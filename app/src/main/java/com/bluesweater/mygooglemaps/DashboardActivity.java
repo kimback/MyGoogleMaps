@@ -269,6 +269,9 @@ public class DashboardActivity extends AppCompatActivity {
         }else{
             //main total rank
             url = ApplicationMaps.mainUrl;
+
+            //url = ApplicationMaps.testUrl;
+
         }
         //+ "&selectedSkiResort=" + pref.getSelectedSkiResort() + "&userId=" + userId;
         displayContent(DISPLAY_CONTENT_MAIN, url, "내정보");

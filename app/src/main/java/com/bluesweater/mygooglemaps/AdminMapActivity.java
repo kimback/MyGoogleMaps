@@ -3,6 +3,7 @@ package com.bluesweater.mygooglemaps;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
@@ -16,11 +17,11 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.bluesweater.mygooglemaps.core.ApplicationMaps;
+import com.bluesweater.mygooglemaps.core.ForegroundService;
 import com.bluesweater.mygooglemaps.core.GeofencingExecutor;
 import com.bluesweater.mygooglemaps.core.MapsPreference;
 import com.google.android.gms.common.ConnectionResult;
@@ -78,7 +79,6 @@ public class AdminMapActivity extends FragmentActivity {
     private GoogleMap mGoogleMap;
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest locationRequest;
-    public GeofencingExecutor geofencesExecute;
 
     //위치정보 interval set
     private static final int UPDATE_INTERVAL_MS = 1000;  // 1초
@@ -91,7 +91,7 @@ public class AdminMapActivity extends FragmentActivity {
 
     //ui
     private RelativeLayout loadingLayout;
-    private LinearLayout adminMapLayout;
+    private RelativeLayout adminMapLayout;
 
     private Handler workerHandler;
 
@@ -104,7 +104,7 @@ public class AdminMapActivity extends FragmentActivity {
         setContentView(R.layout.activity_admin_map);
 
         loadingLayout = (RelativeLayout) findViewById(R.id.loading_bar_layout);
-        adminMapLayout = (LinearLayout) findViewById(R.id.admin_map_layout);
+        adminMapLayout = (RelativeLayout) findViewById(R.id.admin_map_layout);
 
         mActivity = this;
         mapsPreference = ApplicationMaps.getMapsPreference();
@@ -117,6 +117,14 @@ public class AdminMapActivity extends FragmentActivity {
         requestFenceBlockData();
 
         //initGeoService();
+
+
+        Intent foregroundStartIntent = new Intent(AdminMapActivity.this, ForegroundService.class);
+        foregroundStartIntent.setAction(Constants.ACTION.STARTFOREGROUND_ACTION);
+        startService(foregroundStartIntent);
+
+
+
     }
 
     @Override
@@ -139,14 +147,16 @@ public class AdminMapActivity extends FragmentActivity {
 
                 //위치정보가 업데이트 되고 있지 않다면 시작해라
                 if (!mRequestingLocationUpdates) {
-                    Log.i("TAGAdminMapActivity","=======mRequestingLocationUpdates==========");
+                    Log.i("TAGAdminMapActivity", "=======mRequestingLocationUpdates==========");
                     try {
                         //위치 정보 스타트
                         startLocationMachine();
-                    }catch(Exception e){
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
+
+
 
 
             }
@@ -159,8 +169,7 @@ public class AdminMapActivity extends FragmentActivity {
         super.onPause();
         Log.i("TAGAdminMapActivity","=======onPause==========");
 
-        // 이 동작으로 인해 백그라운드 진입시 지오펜싱이 동작안하는 현상이 있음
-        // 지오 펜싱에서 내부적으로는 Google api (mGoogleApiClient) 커넥션이 물려있는것으로 생각됨
+        // 백그라운드 진입시 지오펜싱이 동작안하는 현상이 있음 - 뭐때문인지 확인중
 
         if(firstMapStarted) {
             //위치정보 연결 확인
@@ -169,7 +178,9 @@ public class AdminMapActivity extends FragmentActivity {
                 Log.i("TAGAdminMapActivity", "=======stopLocationUpdates==========");
 
                 //중지하라(백그라운드에서 돌 필요 없음)
-                stopLocationUpdates();
+
+                //백그라운드에서 안도는것 때문에 테스트로 주석처리
+                //stopLocationUpdates();
             }
 
 
@@ -387,7 +398,7 @@ public class AdminMapActivity extends FragmentActivity {
             Log.d(TAG, "===onConnected===");
 
             if(loadingLayout != null){
-                //loadingLayout.setVisibility(View.GONE);
+                loadingLayout.setVisibility(View.GONE);
             }
 
             //업데이트 되고 있지 않다면 시작해라
@@ -493,11 +504,11 @@ public class AdminMapActivity extends FragmentActivity {
         public void setGeoPencingLocation() {
 
             //지오펜스셋팅
-            if(geofencesExecute == null) {
-                geofencesExecute = new GeofencingExecutor(AdminMapActivity.this, fenceList);
+            if(ApplicationMaps.getApps().geofencesExecute == null) {
+                ApplicationMaps.getApps().geofencesExecute = new GeofencingExecutor(AdminMapActivity.this, fenceList);
             }
 
-            List<Map<String, Object>> fencesList = geofencesExecute.fencesList;
+            List<Map<String, Object>> fencesList = ApplicationMaps.getApps().geofencesExecute.fencesList;
 
             for(int i=0 ; i<fencesList.size(); i++){
 
@@ -536,7 +547,7 @@ public class AdminMapActivity extends FragmentActivity {
 
                 Circle circle = mGoogleMap.addCircle(new CircleOptions()
                         .center(geoCurrentLatLng)
-                        .radius(20)
+                        .radius(50)
                         .strokeColor(Color.RED)
                         .fillColor(Color.TRANSPARENT));
 
@@ -822,7 +833,7 @@ public class AdminMapActivity extends FragmentActivity {
                     if(type.equals("show")) {
                         loadingLayout.setVisibility(View.VISIBLE);
                     }else{
-                        //loadingLayout.setVisibility(View.GONE);
+                        loadingLayout.setVisibility(View.GONE);
                     }
                 }
 
@@ -844,8 +855,9 @@ public class AdminMapActivity extends FragmentActivity {
         Log.i("TAGAdminMapActivity","=======on Destroy==========");
 
         //화면과 지오펜싱을 동기화시킴
-        if(geofencesExecute != null){
-            geofencesExecute.requestRemoveGeoFences();
+        if(ApplicationMaps.getApps().geofencesExecute != null){
+            ApplicationMaps.getApps().geofencesExecute.requestRemoveGeoFences();
+            ApplicationMaps.getApps().geofencesExecute = null;
             Log.i("TAGAdminMapActivity","=======requestRemoveGeoFences==========");
         }
 
@@ -859,6 +871,10 @@ public class AdminMapActivity extends FragmentActivity {
             mGoogleApiClient.disconnect();
             Log.i("TAGAdminMapActivity","=======mGoogleApiClient.disconnect==========");
         }
+
+        Intent foregroundStopIntent = new Intent(AdminMapActivity.this, ForegroundService.class);
+        foregroundStopIntent.setAction(Constants.ACTION.STOPFOREGROUND_ACTION);
+        startService(foregroundStopIntent);
 
     }
 }
